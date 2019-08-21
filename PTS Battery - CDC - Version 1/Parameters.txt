@@ -1,0 +1,120 @@
+Parameters file for PTS Battery
+Please make sure to enter all values correctly.
+
+Session type [Train or Select]
+Train
+
+Is SELECT automatic? [Yes or No]
+No
+
+Pellets per Correct Response
+1
+
+Computer Speed [Set to 1 for older computer, 2 for newer]
+2
+
+Auditory Feedback? [Enter Yes or No]
+Yes
+
+Which Folder is the Stimuli Folder?
+Stimuli
+
+What is the background color? [Enter number from 1 to 15, see ReadMe file]
+15
+
+If Select, Trials per Task
+6
+
+Side Task Active? [Yes or No]
+Yes
+
+Side Task Trials to Criterion
+10
+
+Side Task Response Time
+10
+
+Side Task Titration? [Yes or No]
+Yes
+
+Side Start Level
+1
+
+Side Timeout Time
+180
+
+Chase Task Active? [Yes or No]
+Yes
+
+Chase Circle Size [Small, Medium, or Large]
+Large
+
+Chase Task Trials to Criterion
+20
+
+Chase Task Response Time
+10
+
+Chase Task Titration? [Yes or No]
+Yes
+
+Pursuit Task Active? [Yes or No]
+No
+
+Pursuit Circle Size [Small, Medium, or Large]
+Medium
+
+Pursuit Task Trials to Criterion
+1
+
+Pursuit Task Response Time
+1
+
+Pursuit Task Pursuit Time
+10
+
+Pursuit Task Titration? [Yes or No]
+No
+
+MTS Task Active [Yes or No]
+Yes
+
+MTS Task Trials for Criterion
+50
+
+MTS Task % Correct for Criterion
+80
+
+MTS Task Time-out for Incorrect
+10
+
+DMTS Task Active [Yes or No]
+Yes
+
+DMTS Task Trials for Criterion
+100
+
+DMTS Task % Correct for Criterion
+80
+
+DMTS Task Time-out for Incorrect
+10
+
+DMTS Delay Inteval [in seconds or type "Random" or "Titrate"]
+Titrate
+
+Learning Set Task Active [Yes or No]
+Yes
+
+Learning Set Trials Per Problem
+6
+
+Learning Set % Correct for Criterion
+50
+
+Learning Set Time-out for Incorrect
+10
+
+Learning Set Problems Correct for Criterion
+5
+
