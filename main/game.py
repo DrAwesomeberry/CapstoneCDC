@@ -17,19 +17,86 @@ parser.add_argument('-p', dest='parameter_file', type=str, help='filename of par
 parser.add_argument('-s', dest='subject', type=str, help='subject ID for use in output file')
 args = parser.parse_args()
 
-def read_parameter(name):
+general_parameters_keys = ['TASKORDER', 'PELLETS', 'AUDFEED', 'BACKGROUND_COLOR']
+side_parameters_keys = ['ACTIVE', 'TRIALS', 'TIMEOUT', 'TITRATION', 'START_LEVEL']
+chase_parameters_keys = ['ACTIVE', 'TRIALS', 'TIMEOUT', 'TITRATION', 'CIRCLE_SIZE']
+pursuit_parameters_keys = ['ACTIVE', 'TRIALS', 'TIMEOUT', 'PURSUIT_TIME', 'TITRATION', 'CIRCLE_SIZE']
+mts_parameters_keys = ['ACTIVE', 'TRIALS', 'PERCENT', 'TIMEOUT']
+dmts_parameters_keys = ['ACTIVE', 'TRIALS', 'PERCENT', 'TIMEOUT', 'DELAY']
+learning_parameters_keys = ['ACTIVE', 'NUM_PROBS', 'TRIALS_PER_PROB', 'TRIALS', 'PERCENT', 'TIMEOUT']
+
+general_parameters = dict.fromkeys(general_parameters_keys)
+side_parameters = dict.fromkeys(side_parameters_keys)
+chase_parameters = dict.fromkeys(chase_parameters_keys)
+pursuit_parameters = dict.fromkeys(pursuit_parameters_keys)
+mts_parameters = dict.fromkeys(mts_parameters_keys)
+dmts_parameters = dict.fromkeys(dmts_parameters_keys)
+learning_parameters = dict.fromkeys(learning_parameters_keys)
+
+def read_parameter(name, parameters):
     for i in range(0, len(parameters)):
         if re.search(name, parameters[i], re.IGNORECASE):
             return parameters[i + 1].rstrip('\n')
-    sg.Popup('Error:', name + ' was not in found in parameter file')
+
+    sg.Popup('Error:', '\"' + name + '\" parameter does not exist in input file \"' + args.parameter_file + '\"')
     sys.exit()
 
 def load_and_check_params(filename):
     if os.path.exists(filename) is False:
         sg.Popup('Error:', filename + ' does not exist')
-        return
+        sys.exit()
 
-    return
+    parameter_file = open(filename, 'r')
+    parameters = parameter_file.readlines()
+    parameter_file.close()
+
+    general_parameters['TASKORDER'] = read_parameter('Task Order', parameters)
+    general_parameters['PELLETS'] = read_parameter('Pellets', parameters)
+    general_parameters['AUDFEED'] = re.search('Yes', read_parameter('Auditory Feedback', parameters), re.IGNORECASE)
+    general_parameters['BACKGROUND_COLOR'] = read_parameter('Background Color', parameters)
+
+    side_parameters['ACTIVE'] = re.search('Yes', read_parameter('Side Task Active', parameters), re.IGNORECASE)
+    if side_parameters['ACTIVE']:
+        side_parameters['TRIALS'] = read_parameter('Side Task Trials to Criterion', parameters)
+        side_parameters['TIMEOUT'] = read_parameter('Side Task Timeout Time', parameters)
+        side_parameters['TITRATION'] = re.search('Yes', read_parameter('Side Task Titration', parameters), re.IGNORECASE)
+        side_parameters['START_LEVEL'] = read_parameter('Side Start Level', parameters)
+
+    chase_parameters['ACTIVE'] = re.search('Yes', read_parameter('Chase Task Active', parameters), re.IGNORECASE)
+    if chase_parameters['ACTIVE']:
+        chase_parameters['TRIALS'] = read_parameter('Chase Task Trials to Criterion', parameters)
+        chase_parameters['TIMEOUT'] = read_parameter('Chase Task Timeout Time', parameters)
+        chase_parameters['TITRATION'] = re.search('Yes', read_parameter('Chase Task Titration', parameters), re.IGNORECASE)
+        chase_parameters['CIRCLE_SIZE'] = read_parameter('Chase Circle Size', parameters)
+
+    pursuit_parameters['ACTIVE'] = re.search('Yes', read_parameter('Pursuit Task Active', parameters), re.IGNORECASE)
+    if pursuit_parameters['ACTIVE']:
+        pursuit_parameters['TRIALS'] = read_parameter('Pursuit Task Trials to Criterion', parameters)
+        pursuit_parameters['TIMEOUT'] = read_parameter('Pursuit Task Timeout Time', parameters)
+        pursuit_parameters['PURSUIT_TIME'] = read_parameter('Pursuit Task Pursuit Time', parameters)
+        pursuit_parameters['TITRATION'] = re.search('Yes', read_parameter('Pursuit Task Titration', parameters), re.IGNORECASE)
+        pursuit_parameters['CIRCLE_SIZE'] = read_parameter('Pursuit Circle Size', parameters)
+
+    mts_parameters['ACTIVE'] = re.search('Yes', read_parameter('MTS Task Active', parameters), re.IGNORECASE)
+    if mts_parameters['ACTIVE']:
+        mts_parameters['TRIALS'] = read_parameter('MTS Task Trials for Criterion', parameters)
+        mts_parameters['PRECENT'] = read_parameter('MTS Task % Correct for Criterion', parameters)
+        mts_parameters['TIMEOUT'] = read_parameter('MTS Task Timeout Time', parameters)
+
+    dmts_parameters['ACTIVE'] = re.search('Yes', read_parameter('DMTS Task Active', parameters), re.IGNORECASE)
+    if dmts_parameters['ACTIVE']:
+        dmts_parameters['TRIALS'] = read_parameter('DMTS Task Trials for Criterion', parameters)
+        dmts_parameters['PRECENT'] = read_parameter('DMTS Task % Correct for Criterion', parameters)
+        dmts_parameters['TIMEOUT'] = read_parameter('DMTS Task Timeout Time', parameters)
+        dmts_parameters['DELAY'] = read_parameter('DMTS Delay Time', parameters)
+
+    learning_parameters['ACTIVE'] = re.search('Yes', read_parameter('Learning Set Task Active', parameters), re.IGNORECASE)
+    if learning_parameters['ACTIVE']:
+        learning_parameters['NUM_PROBS'] = read_parameter('Learning Set Number of Problems', parameters)
+        learning_parameters['TRIALS_PER_PROB'] = read_parameter('Learning Set Trials Per Problem', parameters)
+        learning_parameters['TRIALS'] = read_parameter('Learning Set Trials Correct for Criterion', parameters)
+        learning_parameters['PERCENT'] = read_parameter('Learning Set % Correct for Criterion', parameters)
+        learning_parameters['TIMEOUT'] = read_parameter('Learning Set Timeout Time', parameters)
 
 # functions to create our resources
 def load_image(name, colorkey=None):
