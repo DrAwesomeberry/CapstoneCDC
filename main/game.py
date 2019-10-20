@@ -1,8 +1,10 @@
-import os, pygame, argparse
+import os, pygame, argparse, re, sys
 
 # pip install pygame --user
 from pygame.locals import *
 from pygame.compat import geterror
+
+import PySimpleGUI as sg
 
 if not pygame.font: print('Warning, fonts disabled')
 if not pygame.mixer: print('Warning, sound disabled')
@@ -17,8 +19,17 @@ args = parser.parse_args()
 
 def read_parameter(name):
     for i in range(0, len(parameters)):
-        if parameters[i].find(name) >= 0:
+        if re.search(name, parameters[i], re.IGNORECASE):
             return parameters[i + 1].rstrip('\n')
+    sg.Popup('Error:', name + ' was not in found in parameter file')
+    sys.exit()
+
+def load_and_check_params(filename):
+    if os.path.exists(filename) is False:
+        sg.Popup('Error:', filename + ' does not exist')
+        return
+
+    return
 
 # functions to create our resources
 def load_image(name, colorkey=None):
@@ -129,6 +140,8 @@ class Chimp(pygame.sprite.Sprite):
        it initializes everything it needs, then runs in
        a loop until the function returns."""
 def main():
+    load_and_check_params(args.parameter_file)
+
     # Initialize Everything
     pygame.init()
     screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
