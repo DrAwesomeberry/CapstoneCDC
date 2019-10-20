@@ -1,7 +1,4 @@
-import os, pygame
-
-# pip install pysimplegui
-import PySimpleGUI as sg
+import os, pygame, argparse
 
 # pip install pygame --user
 from pygame.locals import *
@@ -10,24 +7,18 @@ from pygame.compat import geterror
 if not pygame.font: print('Warning, fonts disabled')
 if not pygame.mixer: print('Warning, sound disabled')
 
-# read animal IDs from file
-animal_id_file = open("AnimalIDS.txt", "r")
-lines = animal_id_file.readlines()
-animal_id_file.close()
-
-games = ['Chase', 'Pursuit', 'Side', 'DMTS', 'LS', 'MTS']
-
 main_dir = os.path.split(os.path.abspath(__file__))[0]
 data_dir = os.path.join(main_dir, 'data')
 
-# All the stuff inside your window. 
-layout = [  [sg.Text('Subject ID:', font = ('Arial', 40, 'bold'), pad = ((10, 10), (80, 10)))],
-            [sg.Combo(lines, font = ('Arial', 40, 'bold'), auto_size_text = False, size = (25, 100), pad = ((10, 10), (10, 10)))],
-            [sg.Text('Game:', font = ('Arial', 40, 'bold'), pad = ((10, 10), (80, 10)))],
-            [sg.Combo(games, font = ('Arial', 40, 'bold'), auto_size_text = False, size = (25, 100), pad = ((10, 10), (10, 100)))],
-            [sg.Button('Start', font = ('Arial', 40, 'bold'), size = (5, 1), pad = ((300, 10), (10, 100)))]
-         ]
+parser = argparse.ArgumentParser()
+parser.add_argument('-p', dest='parameter_file', type=str, help='filename of parameters file to use')
+parser.add_argument('-s', dest='subject', type=str, help='subject ID for use in output file')
+args = parser.parse_args()
 
+def read_parameter(name):
+    for i in range(0, len(parameters)):
+        if parameters[i].find(name) >= 0:
+            return parameters[i + 1].rstrip('\n')
 
 # functions to create our resources
 def load_image(name, colorkey=None):
@@ -134,25 +125,10 @@ class Chimp(pygame.sprite.Sprite):
             self.dizzy = 1
             self.original = self.image
 
-
-def main():
-
-    # Create the Window
-    window = sg.Window('CDC Cognitive Testing', layout)
-    # Event Loop to process "events" and get the "values" of the inputs
-    while True:             
-        event, values = window.read()
-        if event in ([None]):   # if user closes window
-            window.close()
-            sys.exit()
-        if event in (['Start']):
-            break
-
-    window.close()
-
-    """this function is called when the program starts.
+"""this function is called when the program starts.
        it initializes everything it needs, then runs in
        a loop until the function returns."""
+def main():
     # Initialize Everything
     pygame.init()
     screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
@@ -164,7 +140,7 @@ def main():
     background = background.convert()
     background.fill((250, 250, 250))
 
-    # Put Text On The Background, Centered
+    # Put TextCustom On The Background, Centered
     if pygame.font:
         font = pygame.font.Font(None, 36)
         text = font.render("Pummel The Chimp, And Win $$$", 1, (10, 10, 10))
