@@ -1,5 +1,3 @@
-***THE DEFAULT PARAMETERS AND STRUCTURE FOR PARAMETERS FILES***
-
 Task Order [Series, Random]
 Series
 
@@ -20,14 +18,14 @@ Yes
 Side Task Trials to Criterion
 2
 
-Side Timeout Time
-2
+Side Task Timeout Time
+5
 
 Side Task Titration [Yes, No]
 Yes
 
 Side Start Level
-3
+1
 
 
 
@@ -60,7 +58,7 @@ Pursuit Task Timeout Time
 Pursuit Task Pursuit Time
 10
 
-Pursuit Task Titration? [Yes, No]
+Pursuit Task Titration [Yes, No]
 Yes
 
 Pursuit Circle Size [Small, Medium, Large]
