@@ -197,7 +197,10 @@ class Pointer(pygame.sprite.Sprite):
 def main():
     load_and_check_params(args.parameter_file)
 
-    results_file = open(os.path.join(main_dir, 'results', args.subject + 'Data.txt'), 'a+')
+    results_path = os.path.join(main_dir, 'results')
+    if not os.path.exists(results_path):
+        os.makedirs(results_path)
+    results_file = open(os.path.join(results_path, args.subject + 'Data.txt'), 'a+')
 
     # Initialize Everything
     pygame.init()
