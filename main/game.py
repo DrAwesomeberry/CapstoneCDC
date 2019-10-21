@@ -4,6 +4,12 @@ import os, pygame, argparse, re, sys, datetime, time, random
 from pygame.locals import *
 from pygame.compat import geterror
 
+from adafruit_motorkit import MotorKit
+from adafruit_motor import stepper
+kit = MotorKit()
+motor_dir = 1
+dir_num = 0
+
 import PySimpleGUI as sg
 
 if not pygame.font: print('Warning, fonts disabled')
@@ -32,6 +38,19 @@ pursuit_parameters = dict.fromkeys(pursuit_parameters_keys)
 mts_parameters = dict.fromkeys(mts_parameters_keys)
 dmts_parameters = dict.fromkeys(dmts_parameters_keys)
 learning_parameters = dict.fromkeys(learning_parameters_keys)
+
+def pellet():
+
+    for j in range(100):
+        if motor_dir == 1:
+            kit.stepper1.onestep(style=stepper.DOUBLE, direction=stepper.FORWARD)
+        else:
+            kit.stepper1.onestep(style=stepper.DOUBLE, direction=stepper.BACKWARD)
+    
+    dir_num += 1
+    if dir_num > 5:
+        dir_num = 0
+        motor_dir = motor_dir * -1
 
 def read_parameter(name, parameters):
     for i in range(0, len(parameters)):
@@ -264,6 +283,7 @@ def main():
     correct = False
     timeout = False
     trials = 0
+    correct_trials = 0
     start_time = time.time()
 
     # Main Loop
@@ -305,7 +325,9 @@ def main():
             if correct or timeout:
                 trials += 1
                 if correct:
+                    correct_trials += 1
                     correct_sound.play()
+                    pellet()
                     value = "{}  {}  Correct  {}".format(trials, side_level, time.time() - start_time)
                 if timeout:
                     incorrect_sound.play()
@@ -316,8 +338,9 @@ def main():
                 start_time = time.time() # reset
                 correct = False
                 timeout = False
-                if trials >= side_parameters['TRIALS']:
+                if correct_trials >= side_parameters['TRIALS']:
                     trials = 0
+                    correct_trials = 0
                     side_level += 1
                     if side_level > 6: # continue to next stage
                         current_game = 'Chase'
