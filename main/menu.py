@@ -4,7 +4,8 @@ import os, sys, re
 import PySimpleGUI as sg
 
 # read animal IDs from file
-animal_id_file = open('AnimalIDS.txt', 'r')
+main_dir = os.path.split(os.path.abspath(__file__))[0]
+animal_id_file = open(os.path.join(main_dir, 'AnimalIDs.txt'), 'r')
 ids = animal_id_file.read().splitlines()
 animal_id_file.close()
 
@@ -241,7 +242,7 @@ def main():
     save_parameters('parameters.txt', values, parameters)
 
     # use parameters.txt
-    os.system('python game.py -p parameters.txt -s ' + values['SUBJECT'])
+    os.system('python3 game.py -p parameters.txt -s ' + values['SUBJECT'])
 
 # this calls the 'main' function when this script is executed
 if __name__ == '__main__':
