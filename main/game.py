@@ -41,6 +41,10 @@ dmts_parameters = dict.fromkeys(dmts_parameters_keys)
 learning_parameters = dict.fromkeys(learning_parameters_keys)
 game_list = ['']
 
+GREEN = (0,255,0)
+RED = (255,0,0)
+BACKGROUND_COLOR_RGB = (250,250,250)
+
 def pellet():
     return
 
@@ -177,13 +181,78 @@ class Stimuli(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=(x,y))
 
 # classes for our game objects
+class Target(pygame.sprite.Sprite):
+    """moves a pointer on the screen, following the joystick"""
+    def __init__(self, background, current_game, diameter):
+        self.diameter = int(diameter)
+        self.current_game = current_game
+        self.velX = random.choice((-5, 5))
+        self.velY = random.choice((-5, 5))
+        pygame.sprite.Sprite.__init__(self) #call Sprite initializer
+        self.image = pygame.Surface([self.diameter,self.diameter])
+        self.image.fill((BACKGROUND_COLOR_RGB))
+        # self.rect = self.image.get_rect(center=(0, 0))
+        self.rect = pygame.draw.circle(self.image, GREEN, (int(self.diameter/2),int(self.diameter/2)), int(self.diameter/2), 2)
+
+        self.rect.x = random.randint(0, background.get_width() - self.diameter)
+        self.rect.y = random.randint(0, background.get_height() - self.diameter)
+
+        # Count the joysticks the computer has
+        self.joystick_count = pygame.joystick.get_count()
+        if self.joystick_count == 0:
+            # No joysticks!
+            sg.Popup("Error:", "No joystick detected")
+            sys.exit()
+        else:
+            # Use joystick #0 and initialize it
+            self.my_joystick = pygame.joystick.Joystick(0)
+            self.my_joystick.init()
+
+    def update(self, background):
+        # move based on joystick
+        # As long as there is a joystick
+        if self.joystick_count != 0:
+ 
+            # This gets the position of the axis on the game controller
+            # It returns a number between -1.0 and +1.0
+            if (self.current_game == 'Chase'):
+                horiz_axis_pos = self.my_joystick.get_axis(0)
+                if abs(horiz_axis_pos) < 0.1:
+                    horiz_axis_pos = 0
+                vert_axis_pos = self.my_joystick.get_axis(1)
+                if abs(vert_axis_pos) < 0.1:
+                    vert_axis_pos = 0
+     
+                if (horiz_axis_pos != 0 or vert_axis_pos != 0):
+                    self.rect.x = self.rect.x + self.velX;
+                    self.rect.y = self.rect.y + self.velY;
+            else:
+                self.rect.x = self.rect.x + self.velX;
+                self.rect.y = self.rect.y + self.velY;
+
+            if self.rect.x >= background.get_width() - (self.diameter+1):
+                self.rect.x = background.get_width() - (self.diameter+1)
+                self.velX *= -1
+            if self.rect.x < 0:
+                self.rect.x = 0
+                self.velX *= -1
+            if self.rect.y >= background.get_height() - (self.diameter+1):
+                self.rect.y = background.get_height() - (self.diameter+1)
+                self.velY *= -1
+            if self.rect.y < 0:
+                self.rect.y = 0
+                self.velY *= -1
+
+# classes for our game objects
 class Pointer(pygame.sprite.Sprite):
     """moves a pointer on the screen, following the joystick"""
-    def __init__(self):
+    def __init__(self, diameter):
+        self.diameter = int(diameter)
         pygame.sprite.Sprite.__init__(self) #call Sprite initializer
-        self.image = pygame.Surface([25,25])
-        self.image.fill((255,0,0))
-        self.rect = self.image.get_rect(center=(0, 0))
+        self.image = pygame.Surface([self.diameter,self.diameter])
+        self.image.fill(BACKGROUND_COLOR_RGB)
+        # self.rect = self.image.get_rect(center=(0, 0))
+        self.rect = pygame.draw.circle(self.image, RED, (int(self.diameter/2),int(self.diameter/2)), int(self.diameter/2))
 
         # Count the joysticks the computer has
         self.joystick_count = pygame.joystick.get_count()
@@ -200,7 +269,7 @@ class Pointer(pygame.sprite.Sprite):
         self.rect.x = x
         self.rect.y = y
 
-    def update(self):
+    def update(self, background):
         # move based on joystick
         # As long as there is a joystick
         if self.joystick_count != 0:
@@ -219,6 +288,15 @@ class Pointer(pygame.sprite.Sprite):
             # movement.
             self.rect.x = self.rect.x + horiz_axis_pos * 10
             self.rect.y = self.rect.y + vert_axis_pos * 10
+
+            if self.rect.x >= background.get_width() - (self.diameter+1):
+                self.rect.x = background.get_width() - (self.diameter+1)
+            if self.rect.x < 0:
+                self.rect.x = 0
+            if self.rect.y >= background.get_height() - (self.diameter+1):
+                self.rect.y = background.get_height() - (self.diameter+1)
+            if self.rect.y < 0:
+                self.rect.y = 0
 
 
 """this function is called when the program starts.
@@ -240,7 +318,7 @@ def main():
     # Create The Backgound
     background = pygame.Surface(screen.get_size())
     background = background.convert()
-    background.fill((250, 250, 250))
+    background.fill((BACKGROUND_COLOR_RGB))
 
     # Display The Background
     screen.blit(background, (0, 0))
@@ -250,11 +328,9 @@ def main():
     clock = pygame.time.Clock()
     incorrect_sound = load_sound('incorrect.wav')
     correct_sound = load_sound('correct.wav')
-    pointer = Pointer()
+    pointer = Pointer(24)
     allsprites = pygame.sprite.RenderPlain((pointer))
     pointer.reset(background.get_width()/2, background.get_height()/2)
-
-    GREEN = (0,255,0)
 
     current_game = ''
 
@@ -286,6 +362,7 @@ def main():
     setup = False
     chosen = False
     gameover = True
+    inside = False
     trials = 0
     correct_trials = 0
     start_time = time.time()
@@ -318,7 +395,7 @@ def main():
             elif event.type == KEYDOWN and event.key == K_ESCAPE:
                 going = False
 
-        allsprites.update()
+        allsprites.update(background)
         pygame.display.update()
 
         # Draw Everything
@@ -364,7 +441,7 @@ def main():
                     if side_level > 6: # continue to next stage
                         gameover = True
                 if side_level in (1,2):
-                    side_wall_list = [0,1,2,3]
+                    side_wall_list = (0,1,2,3)
                 elif side_level == 3:
                     side_wall_list = random_list(0, 3, 3)
                 elif side_level == 4:
@@ -377,12 +454,101 @@ def main():
 
 
         elif current_game == 'Chase':
-            gameover = True
+            if setup:
+                if (time.time() - start_time > chase_parameters['TIMEOUT']):
+                    timeout = True
+                elif target.rect.contains(pointer):
+                    correct = True
+            else:
+                if re.search('Small', chase_parameters['CIRCLE_SIZE'], re.IGNORECASE):
+                    target_size = 100
+                elif re.search('Medium', chase_parameters['CIRCLE_SIZE'], re.IGNORECASE):
+                    target_size = 200
+                elif re.search('Large', chase_parameters['CIRCLE_SIZE'], re.IGNORECASE):
+                    target_size = 300
+                target = Target(background, 'Chase', target_size)
+                while(target.rect.colliderect(pointer)):
+                    newX = random.randInt(0, background.get_width() - pointer.diameter)
+                    newY = random.randInt(0, background.get_height() - pointer.diameter)
+                    pointer.reset(newX, newY)
+                allsprites = pygame.sprite.RenderPlain((target, pointer))
+                setup = True
+
+            if correct or timeout:
+                trials += 1
+                if correct:
+                    correct_trials += 1
+                    correct_sound.play()
+                    pellet()
+                    value = "{}  Correct  {}".format(trials, time.time() - start_time)
+                elif timeout or correct is False:
+                    incorrect_sound.play()
+                    value = "{}  Timeout  {}".format(trials, time.time() - start_time)
+                time.sleep(3)
+                write_event(results_file, current_game, value)
+                pointer.reset(background.get_width()/2, background.get_height()/2)
+                allsprites = pygame.sprite.RenderPlain((pointer))
+                start_time = time.time() # reset
+                correct = False
+                timeout = False
+                setup = False
+                if correct_trials >= chase_parameters['TRIALS']:
+                    trials = 0
+                    correct_trials = 0
+                    gameover = True
 
 
 
         elif current_game == 'Pursuit':
-            gameover = True
+            if setup:
+                if (time.time() - start_time > pursuit_parameters['TIMEOUT']):
+                    timeout = True
+                elif target.rect.contains(pointer):
+                    if inside:
+                        if (time.time() - start_contains_time >= pursuit_parameters['PURSUIT_TIME']):
+                            correct = True
+                    else:
+                        inside = True
+                        start_contains_time = time.time() # reset
+                else:
+                    inside = False
+            else:
+                if re.search('Small', pursuit_parameters['CIRCLE_SIZE'], re.IGNORECASE):
+                    target_size = 100
+                elif re.search('Medium', pursuit_parameters['CIRCLE_SIZE'], re.IGNORECASE):
+                    target_size = 200
+                elif re.search('Large', pursuit_parameters['CIRCLE_SIZE'], re.IGNORECASE):
+                    target_size = 300
+                target = Target(background, 'Pursuit', target_size)
+                while(target.rect.colliderect(pointer)):
+                    newX = random.randint(0, background.get_width() - pointer.diameter)
+                    newY = random.randint(0, background.get_height() - pointer.diameter)
+                    pointer.reset(newX, newY)
+                allsprites = pygame.sprite.RenderPlain((target, pointer))
+                setup = True
+
+            if correct or timeout:
+                trials += 1
+                if correct:
+                    correct_trials += 1
+                    correct_sound.play()
+                    pellet()
+                    value = "{}  Correct  {}".format(trials, time.time() - start_time)
+                elif timeout or correct is False:
+                    incorrect_sound.play()
+                    value = "{}  Timeout  {}".format(trials, time.time() - start_time)
+                time.sleep(3)
+                write_event(results_file, current_game, value)
+                pointer.reset(background.get_width()/2, background.get_height()/2)
+                allsprites = pygame.sprite.RenderPlain((pointer))
+                start_time = time.time() # reset
+                correct = False
+                timeout = False
+                setup = False
+                if correct_trials >= pursuit_parameters['TRIALS']:
+                    trials = 0
+                    correct_trials = 0
+                    gameover = True
 
 
 
@@ -390,10 +556,10 @@ def main():
             if setup:
                 if (time.time() - start_time > mts_parameters['TIMEOUT']):
                     timeout = True
-                elif stimuli_correct.rect.colliderect(pointer):
+                elif stimuli_correct.rect.contains(pointer):
                     correct = True
                     chosen = True
-                elif stimuli_wrong.rect.colliderect(pointer):
+                elif stimuli_wrong.rect.contains(pointer):
                     correct = False
                     chosen = True
             else:
@@ -401,7 +567,7 @@ def main():
                 wrong_stimuli = random.choice(os.listdir(stimuli_dir))
                 while (correct_stimuli == wrong_stimuli):
                     wrong_stimuli = random.choice(os.listdir(stimuli_dir))
-                correct_position = random.choice([0.15, 0.85])
+                correct_position = random.choice((0.15, 0.85))
                 stimuli_correct = Stimuli(correct_stimuli, background.get_width() * correct_position, background.get_height()/4)
                 stimuli_wrong = Stimuli(wrong_stimuli, background.get_width() * (1 - correct_position), background.get_height()/4)
                 stimuli_bottom = Stimuli(correct_stimuli, background.get_width()/2, background.get_height()*.8)
@@ -443,14 +609,14 @@ def main():
                 if setup:
                     if (time.time() - start_time > dmts_parameters['TIMEOUT']):
                         timeout = True
-                    elif stimuli_correct.rect.colliderect(pointer):
+                    elif stimuli_correct.rect.contains(pointer):
                         correct = True
                         chosen = True
-                    elif stimuli_wrong.rect.colliderect(pointer):
+                    elif stimuli_wrong.rect.contains(pointer):
                         correct = False
                         chosen = True
                 else:
-                    if stimuli_bottom.rect.colliderect(pointer):
+                    if stimuli_bottom.rect.contains(pointer):
                         screen.blit(background, (0, 0))
                         pygame.display.update()
                         time.sleep(dmts_parameters['DELAY'])
