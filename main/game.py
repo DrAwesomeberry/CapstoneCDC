@@ -39,6 +39,7 @@ pursuit_parameters = dict.fromkeys(pursuit_parameters_keys)
 mts_parameters = dict.fromkeys(mts_parameters_keys)
 dmts_parameters = dict.fromkeys(dmts_parameters_keys)
 learning_parameters = dict.fromkeys(learning_parameters_keys)
+game_list = ['']
 
 def pellet():
     return
@@ -72,44 +73,49 @@ def load_and_check_params(filename):
     parameter_file.close()
 
     general_parameters['TASKORDER'] = read_parameter('Task Order', parameters)
-    general_parameters['PELLETS'] = read_parameter('Pellets', parameters)
+    general_parameters['PELLETS'] = int(read_parameter('Pellets', parameters))
     general_parameters['AUDFEED'] = re.search('Yes', read_parameter('Auditory Feedback', parameters), re.IGNORECASE)
     general_parameters['BACKGROUND_COLOR'] = read_parameter('Background Color', parameters)
 
     side_parameters['ACTIVE'] = re.search('Yes', read_parameter('Side Task Active', parameters), re.IGNORECASE)
     if side_parameters['ACTIVE']:
-        side_parameters['TRIALS'] = float(read_parameter('Side Task Trials to Criterion', parameters))
+        side_parameters['TRIALS'] = int(read_parameter('Side Task Trials to Criterion', parameters))
         side_parameters['TIMEOUT'] = float(read_parameter('Side Task Timeout Time', parameters))
         side_parameters['TITRATION'] = re.search('Yes', read_parameter('Side Task Titration', parameters), re.IGNORECASE)
-        side_parameters['START_LEVEL'] = float(read_parameter('Side Start Level', parameters))
+        side_parameters['START_LEVEL'] = int(read_parameter('Side Start Level', parameters))
+        game_list.append('Side')
 
     chase_parameters['ACTIVE'] = re.search('Yes', read_parameter('Chase Task Active', parameters), re.IGNORECASE)
     if chase_parameters['ACTIVE']:
-        chase_parameters['TRIALS'] = float(read_parameter('Chase Task Trials to Criterion', parameters))
+        chase_parameters['TRIALS'] = int(read_parameter('Chase Task Trials to Criterion', parameters))
         chase_parameters['TIMEOUT'] = float(read_parameter('Chase Task Timeout Time', parameters))
         chase_parameters['TITRATION'] = re.search('Yes', read_parameter('Chase Task Titration', parameters), re.IGNORECASE)
-        chase_parameters['CIRCLE_SIZE'] = float(read_parameter('Chase Circle Size', parameters))
+        chase_parameters['CIRCLE_SIZE'] = read_parameter('Chase Circle Size', parameters)
+        game_list.append('Chase')
 
     pursuit_parameters['ACTIVE'] = re.search('Yes', read_parameter('Pursuit Task Active', parameters), re.IGNORECASE)
     if pursuit_parameters['ACTIVE']:
-        pursuit_parameters['TRIALS'] = float(read_parameter('Pursuit Task Trials to Criterion', parameters))
+        pursuit_parameters['TRIALS'] = int(read_parameter('Pursuit Task Trials to Criterion', parameters))
         pursuit_parameters['TIMEOUT'] = float(read_parameter('Pursuit Task Timeout Time', parameters))
         pursuit_parameters['PURSUIT_TIME'] = float(read_parameter('Pursuit Task Pursuit Time', parameters))
         pursuit_parameters['TITRATION'] = re.search('Yes', read_parameter('Pursuit Task Titration', parameters), re.IGNORECASE)
-        pursuit_parameters['CIRCLE_SIZE'] = float(read_parameter('Pursuit Circle Size', parameters))
+        pursuit_parameters['CIRCLE_SIZE'] = read_parameter('Pursuit Circle Size', parameters)
+        game_list.append('Pursuit')
 
     mts_parameters['ACTIVE'] = re.search('Yes', read_parameter('MTS Task Active', parameters), re.IGNORECASE)
     if mts_parameters['ACTIVE']:
         mts_parameters['TRIALS'] = float(read_parameter('MTS Task Trials for Criterion', parameters))
-        mts_parameters['PRECENT'] = float(read_parameter('MTS Task % Correct for Criterion', parameters))
+        mts_parameters['PERCENT'] = float(read_parameter('MTS Task % Correct for Criterion', parameters))
         mts_parameters['TIMEOUT'] = float(read_parameter('MTS Task Timeout Time', parameters))
+        game_list.append('MTS')
 
     dmts_parameters['ACTIVE'] = re.search('Yes', read_parameter('DMTS Task Active', parameters), re.IGNORECASE)
     if dmts_parameters['ACTIVE']:
-        dmts_parameters['TRIALS'] = float(read_parameter('DMTS Task Trials for Criterion', parameters))
-        dmts_parameters['PRECENT'] = float(read_parameter('DMTS Task % Correct for Criterion', parameters))
+        dmts_parameters['TRIALS'] = int(read_parameter('DMTS Task Trials for Criterion', parameters))
+        dmts_parameters['PERCENT'] = float(read_parameter('DMTS Task % Correct for Criterion', parameters))
         dmts_parameters['TIMEOUT'] = float(read_parameter('DMTS Task Timeout Time', parameters))
         dmts_parameters['DELAY'] = float(read_parameter('DMTS Delay Time', parameters))
+        game_list.append('DMTS')
 
     learning_parameters['ACTIVE'] = re.search('Yes', read_parameter('Learning Set Task Active', parameters), re.IGNORECASE)
     if learning_parameters['ACTIVE']:
@@ -118,6 +124,7 @@ def load_and_check_params(filename):
         learning_parameters['TRIALS'] = float(read_parameter('Learning Set Trials Correct for Criterion', parameters))
         learning_parameters['PERCENT'] = float(read_parameter('Learning Set % Correct for Criterion', parameters))
         learning_parameters['TIMEOUT'] = float(read_parameter('Learning Set Timeout Time', parameters))
+        game_list.append('Learning')
 
 def write_event(file, game, value):
     time = datetime.datetime.now()
@@ -138,6 +145,8 @@ def load_image(name, colorkey=None):
     fullname = os.path.join(stimuli_dir, name)
     try:
         image = pygame.image.load(fullname)
+        while (image.get_width() > 650 or image.get_height() > 300):
+            image = pygame.transform.rotozoom(image, 0, 0.9)
     except pygame.error:
         print('Cannot load image:', fullname)
         raise SystemExit(str(geterror()))
@@ -247,7 +256,7 @@ def main():
 
     GREEN = (0,255,0)
 
-    current_game = 'Side'
+    current_game = ''
 
     side_level = side_parameters['START_LEVEL']
     if side_level in (1,2):
@@ -274,7 +283,9 @@ def main():
     correct = False
     timeout = False
     waiting = False
+    setup = False
     chosen = False
+    gameover = True
     trials = 0
     correct_trials = 0
     start_time = time.time()
@@ -282,6 +293,21 @@ def main():
     # Main Loop
     going = True
     while going:
+
+        if gameover:
+            game_list.remove(current_game)
+
+            if len(game_list) == 0:
+                pygame.quit()
+                results_file.close()
+                sys.exit()
+
+            if re.search('Random', general_parameters['TASKORDER'], re.IGNORECASE):
+                current_game = random.choice(game_list)
+            else:
+                current_game = game_list[0]
+
+            gameover = False
 
         clock.tick(60)
 
@@ -301,152 +327,181 @@ def main():
         #pygame.display.flip()
 
         if current_game == 'Side':
-            if side_parameters['ACTIVE']:
+            if (time.time() - start_time > side_parameters['TIMEOUT']):
+                timeout = True
+            elif side_level == 1:
+                for i in side_wall_list:
+                    screen.fill(GREEN, side_walls[i])
+                for event in pygame.event.get():
+                    if pointer.rect.x != background.get_width()/2 or pointer.rect.y != background.get_height()/2:
+                        correct = True
+            elif side_level in (2,3,4,5,6):
+                for i in side_wall_list:
+                    screen.fill(GREEN, side_walls[i])
+                    if side_walls[i].colliderect(pointer):
+                        correct = True
 
-                if (time.time() - start_time > side_parameters['TIMEOUT']):
-                    timeout = True
-                elif side_level == 1:
-                    for i in side_wall_list:
-                        screen.fill(GREEN, side_walls[i])
-                    for event in pygame.event.get():
-                        if pointer.rect.x != background.get_width()/2 or pointer.rect.y != background.get_height()/2:
-                            correct = True
-                elif side_level in (2,3,4,5,6):
-                    for i in side_wall_list:
-                        screen.fill(GREEN, side_walls[i])
-                        if side_walls[i].colliderect(pointer):
-                            correct = True
-
-                if correct or timeout:
-                    trials += 1
-                    if correct:
-                        correct_trials += 1
-                        correct_sound.play()
-                        pellet()
-                        value = "{}  {}  Correct  {}".format(trials, side_level, time.time() - start_time)
-                    elif timeout:
-                        incorrect_sound.play()
-                        value = "{}  {}  Timeout  {}".format(trials, side_level, time.time() - start_time)
-                    write_event(results_file, current_game, value)
-                    time.sleep(3)
-                    pointer.reset(background.get_width()/2, background.get_height()/2)
-                    start_time = time.time() # reset
-                    correct = False
-                    timeout = False
-                    if correct_trials >= side_parameters['TRIALS']:
-                        trials = 0
-                        correct_trials = 0
-                        side_level += 1
-                        if side_level > 6: # continue to next stage
-                            current_game = 'Chase'
-                    if side_level in (1,2):
-                        side_wall_list = [0,1,2,3]
-                    elif side_level == 3:
-                        side_wall_list = random_list(0, 3, 3)
-                    elif side_level == 4:
-                        side_wall_list = random_list(0, 3, 2)
-                    elif side_level == 5:
-                        side_wall_list = random_list(0, 3, 1)
-                    elif side_level == 6:
-                        side_wall_list = random_list(4, 7, 1)
-            else:
-                current_game = 'Chase'
+            if correct or timeout:
+                trials += 1
+                if correct:
+                    correct_trials += 1
+                    correct_sound.play()
+                    pellet()
+                    value = "{}  {}  Correct  {}".format(trials, side_level, time.time() - start_time)
+                elif timeout:
+                    incorrect_sound.play()
+                    value = "{}  {}  Timeout  {}".format(trials, side_level, time.time() - start_time)
+                write_event(results_file, current_game, value)
+                time.sleep(3)
+                pointer.reset(background.get_width()/2, background.get_height()/2)
+                start_time = time.time() # reset
+                correct = False
+                timeout = False
+                if correct_trials >= side_parameters['TRIALS']:
+                    trials = 0
+                    correct_trials = 0
+                    side_level += 1
+                    if side_level > 6: # continue to next stage
+                        gameover = True
+                if side_level in (1,2):
+                    side_wall_list = [0,1,2,3]
+                elif side_level == 3:
+                    side_wall_list = random_list(0, 3, 3)
+                elif side_level == 4:
+                    side_wall_list = random_list(0, 3, 2)
+                elif side_level == 5:
+                    side_wall_list = random_list(0, 3, 1)
+                elif side_level == 6:
+                    side_wall_list = random_list(4, 7, 1)
 
 
 
         elif current_game == 'Chase':
-            if chase_parameters['ACTIVE']:
-                current_game = 'Pursuit'
-
-            else:
-                current_game = 'Pursuit'
+            gameover = True
 
 
 
         elif current_game == 'Pursuit':
-            if pursuit_parameters['ACTIVE']:
-                current_game = 'MTS'
-
-            else:
-                current_game = 'MTS'
+            gameover = True
 
 
 
         elif current_game == 'MTS':
-            if mts_parameters['ACTIVE']:
-                if waiting:
-                    if stimuli_correct.rect.colliderect(pointer):
-                        correct = True
-                        chosen = True
-
-                    if stimuli_wrong.rect.colliderect(pointer):
-                        correct = False
-                        chosen = True
-                else:
-                    correct_stimuli = random.choice(os.listdir(stimuli_dir))
-                    wrong_stimuli = random.choice(os.listdir(stimuli_dir))
-                    while (correct_stimuli == wrong_stimuli):
-                        wrong_stimuli = random.choice(os.listdir(stimuli_dir))
-                    correct_position = random.choice([0.2, 0.8])
-                    stimuli_correct = Stimuli(correct_stimuli, background.get_width() * correct_position, background.get_height()/4)
-                    stimuli_wrong = Stimuli(wrong_stimuli, background.get_width() * (1 - correct_position), background.get_height()/4)
-                    stimuli_bottom = Stimuli(correct_stimuli, background.get_width()/2, background.get_height()*.75)
-                    allsprites = pygame.sprite.RenderPlain((pointer, stimuli_wrong, stimuli_correct, stimuli_bottom))
-                    waiting = True
-
-                if chosen or timeout:
-                    trials += 1
-                    if correct:
-                        correct_trials += 1
-                        correct_sound.play()
-                        pellet()
-                        value = "{}  Correct  {}".format(trials, time.time() - start_time)
-                        time.sleep(3)
-                    elif timeout or correct is False:
-                        incorrect_sound.play()
-                        value = "{}  Timeout  {}".format(trials, time.time() - start_time)
-                        screen.blit(background, (0, 0))
-                        time.sleep(5)
-                    write_event(results_file, current_game, value)
-                    pointer.reset(background.get_width()/2, background.get_height()/2)
-                    allsprites = pygame.sprite.RenderPlain((pointer))
-                    pygame.display.update()
-                    start_time = time.time() # reset
+            if setup:
+                if (time.time() - start_time > mts_parameters['TIMEOUT']):
+                    timeout = True
+                elif stimuli_correct.rect.colliderect(pointer):
+                    correct = True
+                    chosen = True
+                elif stimuli_wrong.rect.colliderect(pointer):
                     correct = False
-                    timeout = False
-                    chosen = False
-                    waiting = False
-                    if correct_trials >= mts_parameters['TRIALS']:
+                    chosen = True
+            else:
+                correct_stimuli = random.choice(os.listdir(stimuli_dir))
+                wrong_stimuli = random.choice(os.listdir(stimuli_dir))
+                while (correct_stimuli == wrong_stimuli):
+                    wrong_stimuli = random.choice(os.listdir(stimuli_dir))
+                correct_position = random.choice([0.15, 0.85])
+                stimuli_correct = Stimuli(correct_stimuli, background.get_width() * correct_position, background.get_height()/4)
+                stimuli_wrong = Stimuli(wrong_stimuli, background.get_width() * (1 - correct_position), background.get_height()/4)
+                stimuli_bottom = Stimuli(correct_stimuli, background.get_width()/2, background.get_height()*.8)
+                allsprites = pygame.sprite.RenderPlain((stimuli_wrong, stimuli_correct, stimuli_bottom, pointer))
+                setup = True
+
+            if chosen or timeout:
+                trials += 1
+                if correct:
+                    correct_trials += 1
+                    correct_sound.play()
+                    pellet()
+                    value = "{}  Correct  {}".format(trials, time.time() - start_time)
+                    time.sleep(3)
+                elif timeout or correct is False:
+                    incorrect_sound.play()
+                    value = "{}  Timeout  {}".format(trials, time.time() - start_time)
+                    screen.blit(background, (0, 0))
+                    pygame.display.update()
+                    time.sleep(5)
+                write_event(results_file, current_game, value)
+                pointer.reset(background.get_width()/2, background.get_height()/2)
+                allsprites = pygame.sprite.RenderPlain((pointer))
+                start_time = time.time() # reset
+                correct = False
+                timeout = False
+                chosen = False
+                setup = False
+                if correct_trials >= mts_parameters['TRIALS']:
+                    if (correct_trials / trials) >= (mts_parameters['PERCENT'] / 100):
                         trials = 0
                         correct_trials = 0
-                        current_game = 'DMTS'
-
-            else:
-                current_game = 'DMTS'
+                        gameover = True
 
 
 
         elif current_game == 'DMTS':
-            if dmts_parameters['ACTIVE']:
-                current_game = 'Learning'
-
+            if waiting:
+                if setup:
+                    if (time.time() - start_time > dmts_parameters['TIMEOUT']):
+                        timeout = True
+                    elif stimuli_correct.rect.colliderect(pointer):
+                        correct = True
+                        chosen = True
+                    elif stimuli_wrong.rect.colliderect(pointer):
+                        correct = False
+                        chosen = True
+                else:
+                    if stimuli_bottom.rect.colliderect(pointer):
+                        screen.blit(background, (0, 0))
+                        pygame.display.update()
+                        time.sleep(dmts_parameters['DELAY'])
+                        allsprites = pygame.sprite.RenderPlain((stimuli_wrong, stimuli_correct, pointer))
+                        setup = True
+                        start_time = time.time() # reset
             else:
-                current_game = 'Learning'
+                correct_stimuli = random.choice(os.listdir(stimuli_dir))
+                wrong_stimuli = random.choice(os.listdir(stimuli_dir))
+                while (correct_stimuli == wrong_stimuli):
+                    wrong_stimuli = random.choice(os.listdir(stimuli_dir))
+                correct_position = random.choice([0.15, 0.85])
+                stimuli_correct = Stimuli(correct_stimuli, background.get_width() * correct_position, background.get_height()/4)
+                stimuli_wrong = Stimuli(wrong_stimuli, background.get_width() * (1 - correct_position), background.get_height()/4)
+                stimuli_bottom = Stimuli(correct_stimuli, background.get_width()/2, background.get_height()*.8)
+                allsprites = pygame.sprite.RenderPlain((stimuli_bottom, pointer))
+                waiting = True
+
+            if chosen or timeout:
+                trials += 1
+                if correct:
+                    correct_trials += 1
+                    correct_sound.play()
+                    pellet()
+                    value = "{}  Correct  {}".format(trials, time.time() - start_time)
+                    time.sleep(3)
+                elif timeout or correct is False:
+                    incorrect_sound.play()
+                    value = "{}  Timeout  {}".format(trials, time.time() - start_time)
+                    screen.blit(background, (0, 0))
+                    pygame.display.update()
+                    time.sleep(5)
+                write_event(results_file, current_game, value)
+                pointer.reset(background.get_width()/2, background.get_height()/2)
+                allsprites = pygame.sprite.RenderPlain((pointer))
+                start_time = time.time() # reset
+                correct = False
+                timeout = False
+                chosen = False
+                waiting = False
+                setup = False
+                if correct_trials >= dmts_parameters['TRIALS']:
+                    if (correct_trials / trials) >= (dmts_parameters['PERCENT'] / 100):
+                        trials = 0
+                        correct_trials = 0
+                        gameover = True
 
 
 
         elif current_game == 'Learning':
-            if learning_parameters['ACTIVE']:
-                going = False
-
-            else:
-                going = False
-
-
-    pygame.quit()
-    results_file.close()
-
-# Game Over
+            gameover = True
 
 
 # this calls the 'main' function when this script is executed
