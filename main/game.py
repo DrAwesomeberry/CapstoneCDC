@@ -4,11 +4,11 @@ import os, pygame, argparse, re, sys, datetime, time, random
 from pygame.locals import *
 from pygame.compat import geterror
 
-# from adafruit_motorkit import MotorKit
-# from adafruit_motor import stepper
-# kit = MotorKit()
-# motor_dir = 1
-# dir_num = 0
+from adafruit_motorkit import MotorKit
+from adafruit_motor import stepper
+kit = MotorKit()
+motor_dir = 1
+dir_num = 0
 
 import PySimpleGUI as sg
 
@@ -46,18 +46,17 @@ RED = (255,0,0)
 BACKGROUND_COLOR_RGB = (250,250,250)
 
 def pellet():
-    return
-
-    # for j in range(100):
-    #     if motor_dir == 1:
-    #         kit.stepper1.onestep(style=stepper.DOUBLE, direction=stepper.FORWARD)
-    #     else:
-    #         kit.stepper1.onestep(style=stepper.DOUBLE, direction=stepper.BACKWARD)
+    for j in range(30):
+        time.sleep(0.01)
+        if motor_dir == 1:
+            kit.stepper1.onestep(style=stepper.DOUBLE, direction=stepper.FORWARD)
+        else:
+            kit.stepper1.onestep(style=stepper.DOUBLE, direction=stepper.BACKWARD)
     
-    # dir_num += 1
-    # if dir_num > 5:
-    #     dir_num = 0
-    #     motor_dir = motor_dir * -1
+    dir_num += 1
+    if dir_num > 5:
+        dir_num = 0
+        motor_dir = motor_dir * -1
 
 def read_parameter(name, parameters):
     for i in range(0, len(parameters)):
