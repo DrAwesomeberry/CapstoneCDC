@@ -1,4 +1,13 @@
-import os, pygame, argparse, re, sys, datetime, time, random
+import os, pygame, re, sys, datetime, time, random
+
+# pip install pysimplegui
+import PySimpleGUI as sg
+
+# read animal IDs from file
+main_dir = os.path.split(os.path.abspath(__file__))[0]
+animal_id_file = open(os.path.join(main_dir, 'AnimalIDs.txt'), 'r')
+ids = animal_id_file.read().splitlines()
+animal_id_file.close()
 
 # pip install pygame --user
 from pygame.locals import *
@@ -19,12 +28,7 @@ main_dir = os.path.split(os.path.abspath(__file__))[0]
 data_dir = os.path.join(main_dir, 'data')
 stimuli_dir = os.path.join(data_dir, 'stimuli')
 
-parser = argparse.ArgumentParser()
-parser.add_argument('-p', dest='parameter_file', type=str, help='filename of parameters file to use')
-parser.add_argument('-s', dest='subject', type=str, help='subject ID for use in output file')
-args = parser.parse_args()
-
-general_parameters_keys = ['TASKORDER', 'PELLETS', 'AUDFEED', 'BACKGROUND_COLOR']
+general_parameters_keys = ['TASKORDER']
 side_parameters_keys = ['ACTIVE', 'TRIALS', 'START_LEVEL', 'RESPONSE', 'TIMEOUT', 'TITRATION']
 chase_parameters_keys = ['ACTIVE', 'TRIALS', 'CIRCLE_SIZE', 'RESPONSE', 'TIMEOUT', 'TITRATION']
 pursuit_parameters_keys = ['ACTIVE', 'TRIALS', 'CIRCLE_SIZE', 'PURSUIT_TIME', 'RESPONSE', 'TIMEOUT', 'TITRATION']
@@ -41,9 +45,9 @@ dmts_parameters = dict.fromkeys(dmts_parameters_keys)
 learning_parameters = dict.fromkeys(learning_parameters_keys)
 game_list = ['']
 
-GREEN = (0,255,0)
 RED = (255,0,0)
-BACKGROUND_COLOR_RGB = (250,250,250)
+GREEN = (0,255,0)
+BACKGROUND_COLOR = (250,250,250)
 
 def pellet():
     return
@@ -77,9 +81,6 @@ def load_and_check_params(filename):
     parameter_file.close()
 
     general_parameters['TASKORDER'] = read_parameter('Task Order', parameters)
-    general_parameters['PELLETS'] = int(read_parameter('Pellets', parameters))
-    general_parameters['AUDFEED'] = re.search('Yes', read_parameter('Auditory Feedback', parameters), re.IGNORECASE)
-    general_parameters['BACKGROUND_COLOR'] = read_parameter('Background Color', parameters)
 
     side_parameters['ACTIVE'] = re.search('Yes', read_parameter('Side Task Active', parameters), re.IGNORECASE)
     if side_parameters['ACTIVE']:
@@ -198,7 +199,7 @@ class Target(pygame.sprite.Sprite):
         self.velY = random.choice((-5, 5))
         pygame.sprite.Sprite.__init__(self) #call Sprite initializer
         self.image = pygame.Surface([self.diameter,self.diameter])
-        self.image.fill((BACKGROUND_COLOR_RGB))
+        self.image.fill((BACKGROUND_COLOR))
         self.rect = pygame.draw.circle(self.image, GREEN, (int(self.diameter/2),int(self.diameter/2)), int(self.diameter/2), 2)
 
         self.rect.x = random.randint(0, background.get_width() - self.diameter)
@@ -265,7 +266,7 @@ class Pointer(pygame.sprite.Sprite):
         self.diameter = int(diameter)
         pygame.sprite.Sprite.__init__(self) #call Sprite initializer
         self.image = pygame.Surface([self.diameter,self.diameter])
-        self.image.fill(BACKGROUND_COLOR_RGB)
+        self.image.fill(BACKGROUND_COLOR)
         # self.rect = self.image.get_rect(center=(0, 0))
         self.rect = pygame.draw.circle(self.image, RED, (int(self.diameter/2),int(self.diameter/2)), int(self.diameter/2))
 
@@ -318,12 +319,40 @@ class Pointer(pygame.sprite.Sprite):
        it initializes everything it needs, then runs in
        a loop until the function returns."""
 def main():
-    load_and_check_params(args.parameter_file)
+    load_and_check_params(os.path.join(main_dir, 'parameters.txt'))
+
+
+
+    layout = [
+                [sg.T(' '  * 10)],
+                [sg.Text('Subject', font = ('Arial', 15, 'bold')), sg.Combo([''] + ids, key = 'SUBJECT')],
+                [sg.T(' '  * 10)],
+                [sg.T(' '  * 10), sg.Button('Run', font = ('Arial', 15, 'bold'), button_color = ('white','green'))],
+                [sg.T(' '  * 10)]
+             ]
+
+    # Create the Window
+    window = sg.Window('Cognitive Testing System', layout)
+
+    while True:
+        event, values = window.read()
+        if event in ([None]):   # if user closes window
+            window.close()
+            sys.exit()
+        if event in (['Run']):
+            error = False
+            if values['SUBJECT'] in ('', None):
+                error = True
+                sg.Popup('Error:', 'Subject field cannot be blank')
+            if error is False:
+                break
+
+    subject = values['SUBJECT']
 
     results_path = os.path.join(main_dir, 'results')
     if not os.path.exists(results_path):
         os.makedirs(results_path)
-    results_file = open(os.path.join(results_path, args.subject + 'Data.txt'), 'a+')
+    results_file = open(os.path.join(results_path, subject + 'Data.txt'), 'a+')
 
     # Initialize Everything
     pygame.init()
@@ -333,7 +362,7 @@ def main():
     # Create The Backgound
     background = pygame.Surface(screen.get_size())
     background = background.convert()
-    background.fill((BACKGROUND_COLOR_RGB))
+    background.fill((BACKGROUND_COLOR))
 
     # Display The Background
     screen.blit(background, (0, 0))

@@ -1,15 +1,6 @@
 Task Order [Series, Random]
 Series
 
-Pellets Per Correct Response
-1
-
-Auditory Feedback [Yes, No]
-Yes
-
-Background Color [Grey, Red, Orange, Yellow, Green, Blue, Purple]
-Grey
-
 
 
 Side Task Active [Yes, No]

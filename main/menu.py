@@ -3,25 +3,17 @@ import os, sys, re
 # pip install pysimplegui
 import PySimpleGUI as sg
 
-# read animal IDs from file
-main_dir = os.path.split(os.path.abspath(__file__))[0]
-animal_id_file = open(os.path.join(main_dir, 'AnimalIDs.txt'), 'r')
-ids = animal_id_file.read().splitlines()
-animal_id_file.close()
-
 # lambda function overloading pysimplegui Text and Input so that they are all the same size/font
 TextCustom = lambda text, font = ('Arial', 11):sg.Text(text = text, font = font, size = (30, 1))
 InputTextCustom = lambda key, text = '':sg.InputText(text, size = (15, 1), key = key)
 
 # layout of the rows of options in start menu
 options = [ 
-            [TextCustom('Subject', font = ('Arial', 11, 'bold')), sg.Combo([''] + ids, key = 'SUBJECT')],
             [TextCustom('Use Parameters from File', font = ('Arial', 11, 'bold')), InputTextCustom('IN_FILE'), sg.FileBrowse()],
             [TextCustom(' '), sg.Button('Load')],
             [TextCustom('Task Order'), sg.Radio('Series', 'RADIO_TASKORDER', key = 'TASKORDER_SERIES'), sg.Radio('Random', 'RADIO_TASKORDER', key = 'TASKORDER_RAND')],
-            [TextCustom('Pellets Per Correct Response'), sg.Combo(('','1','2','3','4','5','6','7','8','9','10'), key = 'PELLETS')],
-            [TextCustom('Auditory Feedback'), sg.Radio('Yes', 'RADIO_AUDFEED', key = 'AUDFEED_YES'), sg.Radio('No', 'RADIO_AUDFEED', key = 'AUDFEED_NO')],
-            [TextCustom('Background Color'), sg.Combo(('','Grey','Red','Orange','Yellow','Green','Blue','Purple'), key = 'COLOR')],
+
+            [sg.T(' '  * 10)],
 
             [TextCustom('Side Task Active', font = ('Arial', 11, 'bold')), sg.Radio('Yes', 'RADIO_S', key = 'S_YES'), sg.Radio('No', 'RADIO_S', key = 'S_NO')],
             [TextCustom('Trials to Criterion'), InputTextCustom('TRIALS_S')],
@@ -30,12 +22,16 @@ options = [
             [TextCustom('Timeout Time (seconds)'), InputTextCustom('TIMEOUT_S')],
             [TextCustom('Titration'), sg.Radio('Yes', 'RADIO_STIT', key = 'TIT_S_YES'), sg.Radio('No', 'RADIO_STIT', key = 'TIT_S_NO')],
 
+            [sg.T(' '  * 10)],
+
             [TextCustom('Chase Task Active', font = ('Arial', 11, 'bold')), sg.Radio('Yes', 'RADIO_C', key = 'C_YES'), sg.Radio('No', 'RADIO_C', key = 'C_NO')],
             [TextCustom('Trials to Criterion'), InputTextCustom('TRIALS_C')],
-            [TextCustom('Circle Size'), sg.Combo(('Small', 'Medium', 'Large'), key = 'CIRCLE_C')],
+            [TextCustom('Circle Size'), sg.Combo(('','Small', 'Medium', 'Large'), key = 'CIRCLE_C')],
             [TextCustom('Response Time (seconds)'), InputTextCustom('RESPONSE_C')],
             [TextCustom('Timeout Time (seconds)'), InputTextCustom('TIMEOUT_C')],
             [TextCustom('Titration'), sg.Radio('Yes', 'RADIO_CTIT', key = 'TIT_C_YES'), sg.Radio('No', 'RADIO_CTIT', key = 'TIT_C_NO')],
+
+            [sg.T(' '  * 10)],
 
             [TextCustom('Pursuit Task Active', font = ('Arial', 11, 'bold')), sg.Radio('Yes', 'RADIO_P', key = 'P_YES'), sg.Radio('No', 'RADIO_P', key = 'P_NO')],
             [TextCustom('Trials to Criterion'), InputTextCustom('TRIALS_P')],
@@ -45,12 +41,16 @@ options = [
             [TextCustom('Timeout Time (seconds)'), InputTextCustom('TIMEOUT_P')],
             [TextCustom('Titration'), sg.Radio('Yes', 'RADIO_PTIT', key = 'TIT_P_YES'), sg.Radio('No', 'RADIO_PTIT', key = 'TIT_P_NO')],
 
+            [sg.T(' '  * 10)],
+
             [TextCustom('MTS Task Active', font = ('Arial', 11, 'bold')), sg.Radio('Yes', 'RADIO_MTS', key = 'MTS_YES'), sg.Radio('No', 'RADIO_MTS', key = 'MTS_NO')],
             [TextCustom('Trials to Criterion'), InputTextCustom('TRIALS_MTS')],
             [TextCustom('% Correct for Criterion'), InputTextCustom('PERCENT_MTS')],
             [TextCustom('Response Time (seconds)'), InputTextCustom('RESPONSE_MTS')],
             [TextCustom('Timeout Time (seconds)'), InputTextCustom('TIMEOUT_MTS')],
             [TextCustom('Titration'), sg.Radio('Yes', 'RADIO_MTSTIT', key = 'TIT_MTS_YES'), sg.Radio('No', 'RADIO_MTSTIT', key = 'TIT_MTS_NO')],
+
+            [sg.T(' '  * 10)],
 
             [TextCustom('DMTS Task Active', font = ('Arial', 11, 'bold')), sg.Radio('Yes', 'RADIO_DMTS', key = 'DMTS_YES'), sg.Radio('No', 'RADIO_DMTS', key = 'DMTS_NO')],
             [TextCustom('Trials to Criterion'), InputTextCustom('TRIALS_DMTS')],
@@ -59,6 +59,8 @@ options = [
             [TextCustom('Response Time (seconds)'), InputTextCustom('RESPONSE_DMTS')],
             [TextCustom('Timeout Time (seconds)'), InputTextCustom('TIMEOUT_DMTS')],
             [TextCustom('Titration'), sg.Radio('Yes', 'RADIO_DMTSTIT', key = 'TIT_DMTS_YES'), sg.Radio('No', 'RADIO_DMTSTIT', key = 'TIT_DMTS_NO')],
+
+            [sg.T(' '  * 10)],
 
             [TextCustom('Learning Set Task Active', font = ('Arial', 11, 'bold')), sg.Radio('Yes', 'RADIO_LS', key = 'L_YES'), sg.Radio('No', 'RADIO_LS', key = 'L_NO')],
             [TextCustom('Trials Per Problem'), InputTextCustom('TRIALSPERPROB_LS')],
@@ -78,7 +80,7 @@ column = [
 # layout of main menu window, options on top to scroll through, then Run button on bottom
 layout = [
             [sg.Column(options, scrollable = True)],
-            [sg.Column(column), sg.Button('Run', font = ('Arial', 25, 'bold'), button_color = ('white','green'))]
+            [sg.Column(column), sg.Button('Go', font = ('Arial', 25, 'bold'), button_color = ('white','green'))]
          ]
 
 def read_parameter(name, parameters):
@@ -108,10 +110,6 @@ def load_parameters(filename, values, window):
 
     window['TASKORDER_SERIES'].Update(re.search('Series', read_parameter('Task Order', parameters), re.IGNORECASE))
     window['TASKORDER_RAND'].Update(re.search('Random', read_parameter('Task Order', parameters), re.IGNORECASE))
-    window['PELLETS'].Update(read_parameter('Pellets', parameters))
-    window['AUDFEED_YES'].Update(re.search('Yes', read_parameter('Auditory Feedback', parameters), re.IGNORECASE))
-    window['AUDFEED_NO'].Update(re.search('No', read_parameter('Auditory Feedback', parameters), re.IGNORECASE))
-    window['COLOR'].Update(read_parameter('Background Color', parameters))
 
     window['S_YES'].Update(re.search('Yes', read_parameter('Side Task Active', parameters), re.IGNORECASE))
     window['S_NO'].Update(re.search('No', read_parameter('Side Task Active', parameters), re.IGNORECASE))
@@ -176,9 +174,6 @@ def load_parameters(filename, values, window):
 def save_parameters(filename, values, parameters):
 
     write_parameter('Task Order', ('Random','Series')[values['TASKORDER_SERIES']], parameters)
-    write_parameter('Pellets', values['PELLETS'], parameters)
-    write_parameter('Auditory Feedback', ('No','Yes')[values['AUDFEED_YES']], parameters)
-    write_parameter('Background Color', values['COLOR'], parameters)
 
     write_parameter('Side Task Active', ('No','Yes')[values['S_YES']], parameters)
     write_parameter('Side Task Trials to Criterion', values['TRIALS_S'], parameters)
@@ -254,12 +249,9 @@ def main():
                     sg.Popup('Error:', 'Need to load parameters from file once first to get format')
             else:
                 sg.Popup('Error:', 'No filename to save parameters to')
-        if event in (['Run']):
+        if event in (['Go']):
             error = False
-            if values['SUBJECT'] in ('', None):
-                error = True
-                sg.Popup('Error:', 'Subject field cannot be blank')
-            elif loaded is False: # need to have input parameters
+            if loaded is False: # need to have input parameters
                 error = True
                 sg.Popup('Error:', 'Must load parameters from file first')
             if error is False:
@@ -270,7 +262,7 @@ def main():
     save_parameters('parameters.txt', values, parameters)
 
     # use parameters.txt
-    os.system('python game.py -p parameters.txt -s ' + values['SUBJECT'])
+    os.system('python game.py')
 
 # this calls the 'main' function when this script is executed
 if __name__ == '__main__':
