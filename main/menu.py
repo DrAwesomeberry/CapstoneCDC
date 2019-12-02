@@ -25,40 +25,48 @@ options = [
 
             [TextCustom('Side Task Active', font = ('Arial', 11, 'bold')), sg.Radio('Yes', 'RADIO_S', key = 'S_YES'), sg.Radio('No', 'RADIO_S', key = 'S_NO')],
             [TextCustom('Trials to Criterion'), InputTextCustom('TRIALS_S')],
+            [TextCustom('Start Level'), sg.Combo(('','1','2','3','4','5','6'), key = 'LEVEL_S')],
+            [TextCustom('Response Time (seconds)'), InputTextCustom('RESPONSE_S')],
             [TextCustom('Timeout Time (seconds)'), InputTextCustom('TIMEOUT_S')],
             [TextCustom('Titration'), sg.Radio('Yes', 'RADIO_STIT', key = 'TIT_S_YES'), sg.Radio('No', 'RADIO_STIT', key = 'TIT_S_NO')],
-            [TextCustom('Start Level'), sg.Combo(('','1','2','3','4','5','6'), key = 'LEVEL_S')],
 
             [TextCustom('Chase Task Active', font = ('Arial', 11, 'bold')), sg.Radio('Yes', 'RADIO_C', key = 'C_YES'), sg.Radio('No', 'RADIO_C', key = 'C_NO')],
             [TextCustom('Trials to Criterion'), InputTextCustom('TRIALS_C')],
+            [TextCustom('Circle Size'), sg.Combo(('Small', 'Medium', 'Large'), key = 'CIRCLE_C')],
+            [TextCustom('Response Time (seconds)'), InputTextCustom('RESPONSE_C')],
             [TextCustom('Timeout Time (seconds)'), InputTextCustom('TIMEOUT_C')],
             [TextCustom('Titration'), sg.Radio('Yes', 'RADIO_CTIT', key = 'TIT_C_YES'), sg.Radio('No', 'RADIO_CTIT', key = 'TIT_C_NO')],
-            [TextCustom('Circle Size'), sg.Combo(('Small', 'Medium', 'Large'), key = 'CIRCLE_C')],
 
             [TextCustom('Pursuit Task Active', font = ('Arial', 11, 'bold')), sg.Radio('Yes', 'RADIO_P', key = 'P_YES'), sg.Radio('No', 'RADIO_P', key = 'P_NO')],
             [TextCustom('Trials to Criterion'), InputTextCustom('TRIALS_P')],
-            [TextCustom('Timeout Time (seconds)'), InputTextCustom('TIMEOUT_P')],
-            [TextCustom('Pursuit Time (seconds)'), InputTextCustom('PURSUIT_P')],
-            [TextCustom('Titration'), sg.Radio('Yes', 'RADIO_PTIT', key = 'TIT_P_YES'), sg.Radio('No', 'RADIO_PTIT', key = 'TIT_P_NO')],
             [TextCustom('Circle Size'), sg.Combo(('','Small','Medium','Large'), key = 'CIRCLE_P')],
+            [TextCustom('Pursuit Time (seconds)'), InputTextCustom('PURSUIT_P')],
+            [TextCustom('Response Time (seconds)'), InputTextCustom('RESPONSE_P')],
+            [TextCustom('Timeout Time (seconds)'), InputTextCustom('TIMEOUT_P')],
+            [TextCustom('Titration'), sg.Radio('Yes', 'RADIO_PTIT', key = 'TIT_P_YES'), sg.Radio('No', 'RADIO_PTIT', key = 'TIT_P_NO')],
 
             [TextCustom('MTS Task Active', font = ('Arial', 11, 'bold')), sg.Radio('Yes', 'RADIO_MTS', key = 'MTS_YES'), sg.Radio('No', 'RADIO_MTS', key = 'MTS_NO')],
             [TextCustom('Trials to Criterion'), InputTextCustom('TRIALS_MTS')],
             [TextCustom('% Correct for Criterion'), InputTextCustom('PERCENT_MTS')],
+            [TextCustom('Response Time (seconds)'), InputTextCustom('RESPONSE_MTS')],
             [TextCustom('Timeout Time (seconds)'), InputTextCustom('TIMEOUT_MTS')],
+            [TextCustom('Titration'), sg.Radio('Yes', 'RADIO_MTSTIT', key = 'TIT_MTS_YES'), sg.Radio('No', 'RADIO_MTSTIT', key = 'TIT_MTS_NO')],
 
             [TextCustom('DMTS Task Active', font = ('Arial', 11, 'bold')), sg.Radio('Yes', 'RADIO_DMTS', key = 'DMTS_YES'), sg.Radio('No', 'RADIO_DMTS', key = 'DMTS_NO')],
             [TextCustom('Trials to Criterion'), InputTextCustom('TRIALS_DMTS')],
             [TextCustom('% Correct for Criterion'), InputTextCustom('PERCENT_DMTS')],
-            [TextCustom('Timeout Time (seconds)'), InputTextCustom('TIMEOUT_DMTS')],
             [TextCustom('Delay Time (seconds)'), InputTextCustom('DELAY_DMTS')],
+            [TextCustom('Response Time (seconds)'), InputTextCustom('RESPONSE_DMTS')],
+            [TextCustom('Timeout Time (seconds)'), InputTextCustom('TIMEOUT_DMTS')],
+            [TextCustom('Titration'), sg.Radio('Yes', 'RADIO_DMTSTIT', key = 'TIT_DMTS_YES'), sg.Radio('No', 'RADIO_DMTSTIT', key = 'TIT_DMTS_NO')],
 
             [TextCustom('Learning Set Task Active', font = ('Arial', 11, 'bold')), sg.Radio('Yes', 'RADIO_LS', key = 'L_YES'), sg.Radio('No', 'RADIO_LS', key = 'L_NO')],
-            [TextCustom('Number of Problems'), InputTextCustom('NUMPROBS_LS')],
             [TextCustom('Trials Per Problem'), InputTextCustom('TRIALSPERPROB_LS')],
-            [TextCustom('Trials Correct for Criterion'), InputTextCustom('TRIALS_LS')],
+            [TextCustom('Number of Problems'), InputTextCustom('NUMPROBS_LS')],
             [TextCustom('% Correct for Criterion'), InputTextCustom('PERCENT_LS')],
+            [TextCustom('Response Time (seconds)'), InputTextCustom('RESPONSE_LS')],
             [TextCustom('Timeout Time (seconds)'), InputTextCustom('TIMEOUT_LS')],
+            [TextCustom('Titration'), sg.Radio('Yes', 'RADIO_LSTIT', key = 'TIT_LS_YES'), sg.Radio('No', 'RADIO_LSTIT', key = 'TIT_LS_NO')],
          ]
 
 column = [
@@ -108,48 +116,60 @@ def load_parameters(filename, values, window):
     window['S_YES'].Update(re.search('Yes', read_parameter('Side Task Active', parameters), re.IGNORECASE))
     window['S_NO'].Update(re.search('No', read_parameter('Side Task Active', parameters), re.IGNORECASE))
     window['TRIALS_S'].Update(read_parameter('Side Task Trials to Criterion', parameters))
+    window['LEVEL_S'].Update(read_parameter('Side Start Level', parameters))
+    window['RESPONSE_S'].Update(read_parameter('Side Task Response Time', parameters))
     window['TIMEOUT_S'].Update(read_parameter('Side Task Timeout Time', parameters))
     window['TIT_S_YES'].Update(re.search('Yes', read_parameter('Side Task Titration', parameters), re.IGNORECASE))
     window['TIT_S_NO'].Update(re.search('No', read_parameter('Side Task Titration', parameters), re.IGNORECASE))
-    window['LEVEL_S'].Update(read_parameter('Side Start Level', parameters))
 
     window['C_YES'].Update(re.search('Yes', read_parameter('Chase Task Active', parameters), re.IGNORECASE))
     window['C_NO'].Update(re.search('No', read_parameter('Chase Task Active', parameters), re.IGNORECASE))
     window['TRIALS_C'].Update(read_parameter('Chase Task Trials to Criterion', parameters))
+    window['CIRCLE_C'].Update(read_parameter('Chase Circle Size', parameters))
+    window['RESPONSE_C'].Update(read_parameter('Chase Task Response Time', parameters))
     window['TIMEOUT_C'].Update(read_parameter('Chase Task Timeout Time', parameters))
     window['TIT_C_YES'].Update(re.search('Yes', read_parameter('Chase Task Titration', parameters), re.IGNORECASE))
     window['TIT_C_NO'].Update(re.search('No', read_parameter('Chase Task Titration', parameters), re.IGNORECASE))
-    window['CIRCLE_C'].Update(read_parameter('Chase Circle Size', parameters))
 
     window['P_YES'].Update(re.search('Yes', read_parameter('Pursuit Task Active', parameters), re.IGNORECASE))
     window['P_NO'].Update(re.search('No', read_parameter('Pursuit Task Active', parameters), re.IGNORECASE))
     window['TRIALS_P'].Update(read_parameter('Pursuit Task Trials to Criterion', parameters))
-    window['TIMEOUT_P'].Update(read_parameter('Pursuit Task Timeout Time', parameters))
+    window['CIRCLE_P'].Update(read_parameter('Pursuit Circle Size', parameters))
     window['PURSUIT_P'].Update(read_parameter('Pursuit Task Pursuit Time', parameters))
+    window['RESPONSE_P'].Update(read_parameter('Pursuit Task Response Time', parameters))
+    window['TIMEOUT_P'].Update(read_parameter('Pursuit Task Timeout Time', parameters))
     window['TIT_P_YES'].Update(re.search('Yes', read_parameter('Pursuit Task Titration', parameters), re.IGNORECASE))
     window['TIT_P_NO'].Update(re.search('No', read_parameter('Pursuit Task Titration', parameters), re.IGNORECASE))
-    window['CIRCLE_P'].Update(read_parameter('Pursuit Circle Size', parameters))
 
     window['MTS_YES'].Update(re.search('Yes', read_parameter('MTS Task Active', parameters), re.IGNORECASE))
     window['MTS_NO'].Update(re.search('No', read_parameter('MTS Task Active', parameters), re.IGNORECASE))
     window['TRIALS_MTS'].Update(read_parameter('MTS Task Trials for Criterion', parameters))
     window['PERCENT_MTS'].Update(read_parameter('MTS Task % Correct for Criterion', parameters))
+    window['RESPONSE_MTS'].Update(read_parameter('MTS Task Response Time', parameters))
     window['TIMEOUT_MTS'].Update(read_parameter('MTS Task Timeout Time', parameters))
+    window['TIT_MTS_YES'].Update(re.search('Yes', read_parameter('MTS Task Titration', parameters), re.IGNORECASE))
+    window['TIT_MTS_NO'].Update(re.search('No', read_parameter('MTS Task Titration', parameters), re.IGNORECASE))
 
     window['DMTS_YES'].Update(re.search('Yes', read_parameter('DMTS Task Active', parameters), re.IGNORECASE))
     window['DMTS_NO'].Update(re.search('No', read_parameter('DMTS Task Active', parameters), re.IGNORECASE))
     window['TRIALS_DMTS'].Update(read_parameter('DMTS Task Trials for Criterion', parameters))
     window['PERCENT_DMTS'].Update(read_parameter('DMTS Task % Correct for Criterion', parameters))
-    window['TIMEOUT_DMTS'].Update(read_parameter('DMTS Task Timeout Time', parameters))
     window['DELAY_DMTS'].Update(read_parameter('DMTS Delay Time', parameters))
+    window['RESPONSE_DMTS'].Update(read_parameter('DMTS Task Response Time', parameters))
+    window['TIMEOUT_DMTS'].Update(read_parameter('DMTS Task Timeout Time', parameters))
+    window['TIT_DMTS_YES'].Update(re.search('Yes', read_parameter('DMTS Task Titration', parameters), re.IGNORECASE))
+    window['TIT_DMTS_NO'].Update(re.search('No', read_parameter('DMTS Task Titration', parameters), re.IGNORECASE))
 
-    window['L_YES'].Update(re.search('Yes', read_parameter('Learning Set Task Active', parameters), re.IGNORECASE))
-    window['L_NO'].Update(re.search('No', read_parameter('Learning Set Task Active', parameters), re.IGNORECASE))
-    window['NUMPROBS_LS'].Update(read_parameter('Learning Set Number of Problems', parameters))
+    window['L_YES'].Update(re.search('Yes', read_parameter('Learning Set Active', parameters), re.IGNORECASE))
+    window['L_NO'].Update(re.search('No', read_parameter('Learning Set Active', parameters), re.IGNORECASE))
     window['TRIALSPERPROB_LS'].Update(read_parameter('Learning Set Trials Per Problem', parameters))
-    window['TRIALS_LS'].Update(read_parameter('Learning Set Trials Correct for Criterion', parameters))
+    window['NUMPROBS_LS'].Update(read_parameter('Learning Set Number of Problems', parameters))
     window['PERCENT_LS'].Update(read_parameter('Learning Set % Correct for Criterion', parameters))
+    window['RESPONSE_LS'].Update(read_parameter('Learning Set Response Time', parameters))
     window['TIMEOUT_LS'].Update(read_parameter('Learning Set Timeout Time', parameters))
+    window['TIT_LS_YES'].Update(re.search('Yes', read_parameter('Learning Set Titration', parameters), re.IGNORECASE))
+    window['TIT_LS_NO'].Update(re.search('No', read_parameter('Learning Set Titration', parameters), re.IGNORECASE))
+
 
     return parameters
 
@@ -162,40 +182,48 @@ def save_parameters(filename, values, parameters):
 
     write_parameter('Side Task Active', ('No','Yes')[values['S_YES']], parameters)
     write_parameter('Side Task Trials to Criterion', values['TRIALS_S'], parameters)
+    write_parameter('Side Start Level', values['LEVEL_S'], parameters)
+    write_parameter('Side Task Response Time', values['RESPONSE_S'], parameters)
     write_parameter('Side Task Timeout Time', values['TIMEOUT_S'], parameters)
     write_parameter('Side Task Titration', ('No','Yes')[values['TIT_S_YES']], parameters)
-    write_parameter('Side Start Level', values['LEVEL_S'], parameters)
 
     write_parameter('Chase Task Active', ('No','Yes')[values['C_YES']], parameters)
     write_parameter('Chase Task Trials to Criterion', values['TRIALS_C'], parameters)
+    write_parameter('Chase Circle Size', values['CIRCLE_C'], parameters)
+    write_parameter('Chase Task Response Time', values['RESPONSE_C'], parameters)
     write_parameter('Chase Task Timeout Time', values['TIMEOUT_C'], parameters)
     write_parameter('Chase Task Titration', ('No','Yes')[values['TIT_C_YES']], parameters)
-    write_parameter('Chase Circle Size', values['CIRCLE_C'], parameters)
 
     write_parameter('Pursuit Task Active', ('No','Yes')[values['P_YES']], parameters)
     write_parameter('Pursuit Task Trials to Criterion', values['TRIALS_P'], parameters)
-    write_parameter('Pursuit Task Timeout Time', values['TIMEOUT_P'], parameters)
-    write_parameter('Pursuit Task Pursuit Time', values['PURSUIT_P'], parameters)
-    write_parameter('Pursuit Task Titration', ('No','Yes')[values['TIT_P_YES']], parameters)
     write_parameter('Pursuit Circle Size', values['CIRCLE_P'], parameters)
+    write_parameter('Pursuit Task Pursuit Time', values['PURSUIT_P'], parameters)
+    write_parameter('Pursuit Task Response Time', values['RESPONSE_P'], parameters)
+    write_parameter('Pursuit Task Timeout Time', values['TIMEOUT_P'], parameters)
+    write_parameter('Pursuit Task Titration', ('No','Yes')[values['TIT_P_YES']], parameters)
 
     write_parameter('MTS Task Active', ('No','Yes')[values['MTS_YES']], parameters)
     write_parameter('MTS Task Trials for Criterion', values['TRIALS_MTS'], parameters)
     write_parameter('MTS Task % Correct for Criterion', values['PERCENT_MTS'], parameters)
+    write_parameter('MTS Task Response Time', values['RESPONSE_MTS'], parameters)
     write_parameter('MTS Task Timeout Time', values['TIMEOUT_MTS'], parameters)
+    write_parameter('MTS Task Titration', ('No','Yes')[values['TIT_MTS_YES']], parameters)
 
     write_parameter('DMTS Task Active', ('No','Yes')[values['DMTS_YES']], parameters)
     write_parameter('DMTS Task Trials for Criterion', values['TRIALS_DMTS'], parameters)
     write_parameter('DMTS Task % Correct for Criterion', values['PERCENT_DMTS'], parameters)
-    write_parameter('DMTS Task Timeout Time', values['TIMEOUT_DMTS'], parameters)
     write_parameter('DMTS Delay Time', values['DELAY_DMTS'], parameters)
+    write_parameter('DMTS Task Response Time', values['RESPONSE_DMTS'], parameters)
+    write_parameter('DMTS Task Timeout Time', values['TIMEOUT_DMTS'], parameters)
+    write_parameter('DMTS Task Titration', ('No','Yes')[values['TIT_DMTS_YES']], parameters)
 
-    write_parameter('Learning Set Task Active', ('No','Yes')[values['L_YES']], parameters)
-    write_parameter('Learning Set Number of Problems', values['NUMPROBS_LS'], parameters)
+    write_parameter('Learning Set Active', ('No','Yes')[values['L_YES']], parameters)
     write_parameter('Learning Set Trials Per Problem', values['TRIALSPERPROB_LS'], parameters)
-    write_parameter('Learning Set Trials Correct for Criterion', values['TRIALS_LS'], parameters)
+    write_parameter('Learning Set Number of Problems', values['NUMPROBS_LS'], parameters)
     write_parameter('Learning Set % Correct for Criterion', values['PERCENT_LS'], parameters)
+    write_parameter('Learning Set Response Time', values['RESPONSE_LS'], parameters)
     write_parameter('Learning Set Timeout Time', values['TIMEOUT_LS'], parameters)
+    write_parameter('Learning Set Titration', ('No','Yes')[values['TIT_LS_YES']], parameters)
 
     parameter_file = open(filename, 'w')
     parameter_file.writelines(parameters)
@@ -242,7 +270,7 @@ def main():
     save_parameters('parameters.txt', values, parameters)
 
     # use parameters.txt
-    os.system('python3 game.py -p parameters.txt -s ' + values['SUBJECT'])
+    os.system('python game.py -p parameters.txt -s ' + values['SUBJECT'])
 
 # this calls the 'main' function when this script is executed
 if __name__ == '__main__':
