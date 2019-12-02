@@ -262,7 +262,7 @@ def main():
     save_parameters('parameters.txt', values, parameters)
 
     # use parameters.txt
-    os.system('python game.py')
+    os.system('python3 game.py')
 
 # this calls the 'main' function when this script is executed
 if __name__ == '__main__':

@@ -3,12 +3,6 @@ import os, pygame, re, sys, datetime, time, random
 # pip install pysimplegui
 import PySimpleGUI as sg
 
-# read animal IDs from file
-main_dir = os.path.split(os.path.abspath(__file__))[0]
-animal_id_file = open(os.path.join(main_dir, 'AnimalIDs.txt'), 'r')
-ids = animal_id_file.read().splitlines()
-animal_id_file.close()
-
 # pip install pygame --user
 from pygame.locals import *
 from pygame.compat import geterror
@@ -18,8 +12,6 @@ from adafruit_motor import stepper
 kit = MotorKit()
 motor_dir = 1
 dir_num = 0
-
-import PySimpleGUI as sg
 
 if not pygame.font: print('Warning, fonts disabled')
 if not pygame.mixer: print('Warning, sound disabled')
@@ -318,9 +310,17 @@ class Pointer(pygame.sprite.Sprite):
        it initializes everything it needs, then runs in
        a loop until the function returns."""
 def main():
+    filename = os.path.join(main_dir, 'AnimalIDs.txt')
+
+    if os.path.exists(filename) is False:
+        sg.Popup('Error:', filename + ' does not exist')
+        sys.exit()
+
+    animal_id_file = open(os.path.join(main_dir, 'AnimalIDs.txt'), 'r')
+    ids = animal_id_file.read().splitlines()
+    animal_id_file.close()
+
     load_and_check_params(os.path.join(main_dir, 'parameters.txt'))
-
-
 
     layout = [
                 [sg.T(' '  * 10)],
