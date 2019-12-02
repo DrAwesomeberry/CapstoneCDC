@@ -3,6 +3,9 @@ import os, sys, re
 # pip install pysimplegui
 import PySimpleGUI as sg
 
+main_dir = os.path.split(os.path.abspath(__file__))[0]
+os.chdir(main_dir)
+
 # lambda function overloading pysimplegui Text and Input so that they are all the same size/font
 TextCustom = lambda text, font = ('Arial', 11):sg.Text(text = text, font = font, size = (30, 1))
 InputTextCustom = lambda key, text = '':sg.InputText(text, size = (15, 1), key = key)
@@ -259,10 +262,10 @@ def main():
 
     window.close()
 
-    save_parameters('parameters.txt', values, parameters)
+    save_parameters(os.path.join(main_dir, 'parameters.txt'), values, parameters)
 
     # use parameters.txt
-    os.system('python3 game.py')
+    os.system('python3 {}'.format(os.path.join(main_dir, 'game.py')))
 
 # this calls the 'main' function when this script is executed
 if __name__ == '__main__':

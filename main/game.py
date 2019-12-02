@@ -16,6 +16,8 @@ dir_num = 0
 if not pygame.font: print('Warning, fonts disabled')
 if not pygame.mixer: print('Warning, sound disabled')
 
+parameters_file = 'parameters.txt'
+
 main_dir = os.path.split(os.path.abspath(__file__))[0]
 data_dir = os.path.join(main_dir, 'data')
 stimuli_dir = os.path.join(data_dir, 'stimuli')
@@ -42,6 +44,9 @@ GREEN = (0,255,0)
 BACKGROUND_COLOR = (250,250,250)
 
 def pellet():
+    global motor_dir
+    global dir_num
+
     for j in range(30):
         time.sleep(0.01)
         if motor_dir == 1:
@@ -59,7 +64,7 @@ def read_parameter(name, parameters):
         if re.search(name, parameters[i], re.IGNORECASE):
             return parameters[i + 1].rstrip('\n')
 
-    sg.Popup('Error:', '\"' + name + '\" parameter does not exist in input file \"' + args.parameter_file + '\"')
+    sg.Popup('Error:', '\"' + name + '\" parameter does not exist in input file \"' + parameters_file + '\"')
     sys.exit()
 
 def load_and_check_params(filename):
@@ -320,7 +325,7 @@ def main():
     ids = animal_id_file.read().splitlines()
     animal_id_file.close()
 
-    load_and_check_params(os.path.join(main_dir, 'parameters.txt'))
+    load_and_check_params(os.path.join(main_dir, parameters_file))
 
     layout = [
                 [sg.T(' '  * 10)],
