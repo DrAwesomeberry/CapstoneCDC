@@ -133,9 +133,9 @@ def load_and_check_params(filename):
         learning_parameters['TRIALS_PER_PROB'] = float(read_parameter('Learning Set Trials Per Problem', parameters))
         learning_parameters['NUM_PROBS'] = float(read_parameter('Learning Set Number of Problems', parameters))
         learning_parameters['PERCENT'] = float(read_parameter('Learning Set % Correct for Criterion', parameters))
-        learning_parameters['RESPONSE'] = float(read_parameter('Learning Set Task Response Time', parameters))
+        learning_parameters['RESPONSE'] = float(read_parameter('Learning Set Response Time', parameters))
         learning_parameters['TIMEOUT'] = float(read_parameter('Learning Set Timeout Time', parameters))
-        learning_parameters['TITRATION'] = re.search('Yes', read_parameter('Learning Set Task Titration', parameters), re.IGNORECASE)
+        learning_parameters['TITRATION'] = re.search('Yes', read_parameter('Learning Set Titration', parameters), re.IGNORECASE)
         game_list.append('Learning')
 
 def write_event(file, game, value):
@@ -199,7 +199,6 @@ class Target(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self) #call Sprite initializer
         self.image = pygame.Surface([self.diameter,self.diameter])
         self.image.fill((BACKGROUND_COLOR_RGB))
-        # self.rect = self.image.get_rect(center=(0, 0))
         self.rect = pygame.draw.circle(self.image, GREEN, (int(self.diameter/2),int(self.diameter/2)), int(self.diameter/2), 2)
 
         self.rect.x = random.randint(0, background.get_width() - self.diameter)
@@ -215,6 +214,14 @@ class Target(pygame.sprite.Sprite):
             # Use joystick #0 and initialize it
             self.my_joystick = pygame.joystick.Joystick(0)
             self.my_joystick.init()
+
+    def change_color(self, color):
+        x = self.rect.x
+        y = self.rect.y
+        self.rect = pygame.draw.circle(self.image, color, (int(self.diameter/2),int(self.diameter/2)), int(self.diameter/2), 2)
+
+        self.rect.x = x
+        self.rect.y = y
 
     def update(self, background):
         # move based on joystick
@@ -436,7 +443,7 @@ def main():
                     correct_sound.play()
                     pellet()
                     value = "{}  {}  Correct  {}".format(trials, side_level, time.time() - start_time)
-                    time.sleep(1)
+                    time.sleep(3)
                 elif timeout:
                     incorrect_sound.play()
                     value = "{}  {}  Timeout  {}".format(trials, side_level, time.time() - start_time)
@@ -495,7 +502,7 @@ def main():
                     correct_sound.play()
                     pellet()
                     value = "{}  Correct  {}".format(trials, time.time() - start_time)
-                    time.sleep(1)
+                    time.sleep(3)
                 elif timeout or correct is False:
                     incorrect_sound.play()
                     value = "{}  Timeout  {}".format(trials, time.time() - start_time)
@@ -522,12 +529,14 @@ def main():
                     timeout = True
                 elif target.rect.contains(pointer):
                     if inside:
+                        target.change_color(GREEN)
                         if (time.time() - start_contains_time >= pursuit_parameters['PURSUIT_TIME']):
                             correct = True
                     else:
                         inside = True
                         start_contains_time = time.time() # reset
                 else:
+                    target.change_color(RED)
                     inside = False
             else:
                 if re.search('Small', pursuit_parameters['CIRCLE_SIZE'], re.IGNORECASE):
@@ -551,7 +560,7 @@ def main():
                     correct_sound.play()
                     pellet()
                     value = "{}  Correct  {}".format(trials, time.time() - start_time)
-                    time.sleep(1)
+                    time.sleep(3)
                 elif timeout or correct is False:
                     incorrect_sound.play()
                     value = "{}  Timeout  {}".format(trials, time.time() - start_time)
@@ -601,7 +610,7 @@ def main():
                     correct_sound.play()
                     pellet()
                     value = "{}  Correct  {}".format(trials, time.time() - start_time)
-                    time.sleep(1)
+                    time.sleep(3)
                 elif timeout or correct is False:
                     incorrect_sound.play()
                     value = "{}  Timeout  {}".format(trials, time.time() - start_time)
@@ -662,7 +671,7 @@ def main():
                     correct_sound.play()
                     pellet()
                     value = "{}  Correct  {}".format(trials, time.time() - start_time)
-                    time.sleep(1)
+                    time.sleep(3)
                 elif timeout or correct is False:
                     incorrect_sound.play()
                     value = "{}  Timeout  {}".format(trials, time.time() - start_time)

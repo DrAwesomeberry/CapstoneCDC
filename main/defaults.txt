@@ -118,7 +118,7 @@ No
 
 
 
-Learning Set Active [Yes, No]
+Learning Set Task Active [Yes, No]
 Yes
 
 Learning Set Trials Per Problem

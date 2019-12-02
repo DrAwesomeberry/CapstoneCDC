@@ -160,7 +160,7 @@ def load_parameters(filename, values, window):
     window['TIT_DMTS_YES'].Update(re.search('Yes', read_parameter('DMTS Task Titration', parameters), re.IGNORECASE))
     window['TIT_DMTS_NO'].Update(re.search('No', read_parameter('DMTS Task Titration', parameters), re.IGNORECASE))
 
-    window['L_YES'].Update(re.search('Yes', read_parameter('Learning Set Active', parameters), re.IGNORECASE))
+    window['L_YES'].Update(re.search('Yes', read_parameter('Learning Set Task Active', parameters), re.IGNORECASE))
     window['L_NO'].Update(re.search('No', read_parameter('Learning Set Active', parameters), re.IGNORECASE))
     window['TRIALSPERPROB_LS'].Update(read_parameter('Learning Set Trials Per Problem', parameters))
     window['NUMPROBS_LS'].Update(read_parameter('Learning Set Number of Problems', parameters))
@@ -217,7 +217,7 @@ def save_parameters(filename, values, parameters):
     write_parameter('DMTS Task Timeout Time', values['TIMEOUT_DMTS'], parameters)
     write_parameter('DMTS Task Titration', ('No','Yes')[values['TIT_DMTS_YES']], parameters)
 
-    write_parameter('Learning Set Active', ('No','Yes')[values['L_YES']], parameters)
+    write_parameter('Learning Set Task Active', ('No','Yes')[values['L_YES']], parameters)
     write_parameter('Learning Set Trials Per Problem', values['TRIALSPERPROB_LS'], parameters)
     write_parameter('Learning Set Number of Problems', values['NUMPROBS_LS'], parameters)
     write_parameter('Learning Set % Correct for Criterion', values['PERCENT_LS'], parameters)
