@@ -13,11 +13,11 @@ animal_id_file.close()
 from pygame.locals import *
 from pygame.compat import geterror
 
-# from adafruit_motorkit import MotorKit
-# from adafruit_motor import stepper
-# kit = MotorKit()
-# motor_dir = 1
-# dir_num = 0
+from adafruit_motorkit import MotorKit
+from adafruit_motor import stepper
+kit = MotorKit()
+motor_dir = 1
+dir_num = 0
 
 import PySimpleGUI as sg
 
@@ -34,7 +34,7 @@ chase_parameters_keys = ['ACTIVE', 'TRIALS', 'CIRCLE_SIZE', 'RESPONSE', 'TIMEOUT
 pursuit_parameters_keys = ['ACTIVE', 'TRIALS', 'CIRCLE_SIZE', 'PURSUIT_TIME', 'RESPONSE', 'TIMEOUT', 'TITRATION']
 mts_parameters_keys = ['ACTIVE', 'TRIALS', 'PERCENT', 'RESPONSE', 'TIMEOUT', 'TITRATION']
 dmts_parameters_keys = ['ACTIVE', 'TRIALS', 'PERCENT', 'DELAY', 'RESPONSE', 'TIMEOUT', 'TITRATION']
-learning_parameters_keys = ['ACTIVE', 'TRIALS_PER_PROB', 'NUM_PROBS', 'PERCENT', 'RESPONSE', 'TIMEOUT', 'TITRATION']
+ls_parameters_keys = ['ACTIVE', 'TRIALS_PER_PROB', 'NUM_PROBS', 'PERCENT', 'RESPONSE', 'TIMEOUT', 'TITRATION']
 
 general_parameters = dict.fromkeys(general_parameters_keys)
 side_parameters = dict.fromkeys(side_parameters_keys)
@@ -42,7 +42,7 @@ chase_parameters = dict.fromkeys(chase_parameters_keys)
 pursuit_parameters = dict.fromkeys(pursuit_parameters_keys)
 mts_parameters = dict.fromkeys(mts_parameters_keys)
 dmts_parameters = dict.fromkeys(dmts_parameters_keys)
-learning_parameters = dict.fromkeys(learning_parameters_keys)
+ls_parameters = dict.fromkeys(ls_parameters_keys)
 game_list = ['']
 
 RED = (255,0,0)
@@ -50,18 +50,17 @@ GREEN = (0,255,0)
 BACKGROUND_COLOR = (250,250,250)
 
 def pellet():
-    return
-    # for j in range(30):
-    #     time.sleep(0.01)
-    #     if motor_dir == 1:
-    #         kit.stepper1.onestep(style=stepper.DOUBLE, direction=stepper.FORWARD)
-    #     else:
-    #         kit.stepper1.onestep(style=stepper.DOUBLE, direction=stepper.BACKWARD)
+    for j in range(30):
+        time.sleep(0.01)
+        if motor_dir == 1:
+            kit.stepper1.onestep(style=stepper.DOUBLE, direction=stepper.FORWARD)
+        else:
+            kit.stepper1.onestep(style=stepper.DOUBLE, direction=stepper.BACKWARD)
     
-    # dir_num += 1
-    # if dir_num > 5:
-    #     dir_num = 0
-    #     motor_dir = motor_dir * -1
+    dir_num += 1
+    if dir_num > 5:
+        dir_num = 0
+        motor_dir = motor_dir * -1
 
 def read_parameter(name, parameters):
     for i in range(0, len(parameters)):
@@ -129,15 +128,15 @@ def load_and_check_params(filename):
         dmts_parameters['TITRATION'] = re.search('Yes', read_parameter('DMTS Task Titration', parameters), re.IGNORECASE)
         game_list.append('DMTS')
 
-    learning_parameters['ACTIVE'] = re.search('Yes', read_parameter('Learning Set Task Active', parameters), re.IGNORECASE)
-    if learning_parameters['ACTIVE']:
-        learning_parameters['TRIALS_PER_PROB'] = float(read_parameter('Learning Set Trials Per Problem', parameters))
-        learning_parameters['NUM_PROBS'] = float(read_parameter('Learning Set Number of Problems', parameters))
-        learning_parameters['PERCENT'] = float(read_parameter('Learning Set % Correct for Criterion', parameters))
-        learning_parameters['RESPONSE'] = float(read_parameter('Learning Set Response Time', parameters))
-        learning_parameters['TIMEOUT'] = float(read_parameter('Learning Set Timeout Time', parameters))
-        learning_parameters['TITRATION'] = re.search('Yes', read_parameter('Learning Set Titration', parameters), re.IGNORECASE)
-        game_list.append('Learning')
+    ls_parameters['ACTIVE'] = re.search('Yes', read_parameter('Learning Set Task Active', parameters), re.IGNORECASE)
+    if ls_parameters['ACTIVE']:
+        ls_parameters['TRIALS_PER_PROB'] = float(read_parameter('Learning Set Trials Per Problem', parameters))
+        ls_parameters['NUM_PROBS'] = float(read_parameter('Learning Set Number of Problems', parameters))
+        ls_parameters['PERCENT'] = float(read_parameter('Learning Set % Correct for Criterion', parameters))
+        ls_parameters['RESPONSE'] = float(read_parameter('Learning Set Response Time', parameters))
+        ls_parameters['TIMEOUT'] = float(read_parameter('Learning Set Timeout Time', parameters))
+        ls_parameters['TITRATION'] = re.search('Yes', read_parameter('Learning Set Titration', parameters), re.IGNORECASE)
+        game_list.append('LS')
 
 def write_event(file, game, value):
     time = datetime.datetime.now()
@@ -399,6 +398,7 @@ def main():
                     pygame.Rect(0,0,200,background.get_height()/4),
                     pygame.Rect(background.get_width()-200,0,200,background.get_height()/4)
                  ]
+    side_walls_str = ''
 
     correct = False
     timeout = False
@@ -408,10 +408,12 @@ def main():
     gameover = True
     inside = False
     trials = 0
+    total_trials = 0
     correct_trials = 0
     problem_trials = 0
-    problems = 0
+    problems = 1
     new_stimuli = True
+    correct_stimuli = ''
     start_time = time.time()
 
     # Main Loop
@@ -465,17 +467,31 @@ def main():
                     if side_walls[i].colliderect(pointer):
                         correct = True
 
+
+
             if correct or timeout:
                 trials += 1
+                total_trials += 1
+
+                side_walls_str = ''
+                if 0 in side_wall_list or 4 in side_wall_list:
+                    side_walls_str += 'T'
+                if 3 in side_wall_list or 7 in side_wall_list:
+                    side_walls_str +='R'
+                if 1 in side_wall_list or 5 in side_wall_list:
+                    side_walls_str += 'B'
+                if 2 in side_wall_list or 6 in side_wall_list:
+                    side_walls_str += 'L'
+
                 if correct:
                     correct_trials += 1
                     correct_sound.play()
                     pellet()
-                    value = "{}  {}  Correct  {}".format(trials, side_level, time.time() - start_time)
+                    value = "{}  {}  {}  {}  {}".format(total_trials, trials, side_level, side_walls_str, round(time.time() - start_time, 2))
                     time.sleep(3)
                 elif timeout:
                     incorrect_sound.play()
-                    value = "{}  {}  Timeout  {}".format(trials, side_level, time.time() - start_time)
+                    value = "{}  {}  {}  {}  {}".format(total_trials, trials, side_level, side_walls_str, round(time.time() - start_time, 2))
                     screen.blit(background, (0, 0))
                     pygame.display.update()
                     time.sleep(side_parameters['TIMEOUT'])
@@ -485,10 +501,10 @@ def main():
                 correct = False
                 timeout = False
                 if correct_trials >= side_parameters['TRIALS']:
-                    trials = 0
                     correct_trials = 0
                     side_level += 1
                     if side_level > 6: # continue to next stage
+                        trials = 0
                         gameover = True
                 if side_level in (1,2):
                     side_wall_list = (0,1,2,3)
@@ -526,15 +542,16 @@ def main():
 
             if correct or timeout:
                 trials += 1
+                total_trials += 1
                 if correct:
                     correct_trials += 1
                     correct_sound.play()
                     pellet()
-                    value = "{}  Correct  {}".format(trials, time.time() - start_time)
+                    value = "{}  {}  {}  {}".format(total_trials, trials, chase_parameters['CIRCLE_SIZE'], round(time.time() - start_time, 2))
                     time.sleep(3)
                 elif timeout or correct is False:
                     incorrect_sound.play()
-                    value = "{}  Timeout  {}".format(trials, time.time() - start_time)
+                    value = "{}  {}  {}  {}".format(total_trials, trials, chase_parameters['CIRCLE_SIZE'], round(time.time() - start_time, 2))
                     screen.blit(background, (0, 0))
                     pygame.display.update()
                     time.sleep(chase_parameters['TIMEOUT'])
@@ -584,15 +601,16 @@ def main():
 
             if correct or timeout:
                 trials += 1
+                total_trials += 1
                 if correct:
                     correct_trials += 1
                     correct_sound.play()
                     pellet()
-                    value = "{}  Correct  {}".format(trials, time.time() - start_time)
+                    value = "{}  {}  {}  {}".format(total_trials, trials, pursuit_parameters['CIRCLE_SIZE'], round(time.time() - start_time, 2))
                     time.sleep(3)
                 elif timeout or correct is False:
                     incorrect_sound.play()
-                    value = "{}  Timeout  {}".format(trials, time.time() - start_time)
+                    value = "{}  {}  {}  {}".format(total_trials, trials, pursuit_parameters['CIRCLE_SIZE'], round(time.time() - start_time, 2))
                     screen.blit(background, (0, 0))
                     pygame.display.update()
                     time.sleep(pursuit_parameters['TIMEOUT'])
@@ -621,28 +639,37 @@ def main():
                     correct = False
                     chosen = True
             else:
-                correct_stimuli = random.choice(os.listdir(stimuli_dir))
-                wrong_stimuli = random.choice(os.listdir(stimuli_dir))
-                while (correct_stimuli == wrong_stimuli):
-                    wrong_stimuli = random.choice(os.listdir(stimuli_dir))
-                correct_position = random.choice((0.15, 0.85))
-                stimuli_correct = Stimuli(correct_stimuli, background.get_width() * correct_position, background.get_height()/4)
-                stimuli_wrong = Stimuli(wrong_stimuli, background.get_width() * (1 - correct_position), background.get_height()/4)
+                left_stimuli = random.choice(os.listdir(stimuli_dir))
+                right_stimuli = random.choice(os.listdir(stimuli_dir))
+                while (left_stimuli == right_stimuli):
+                    left_stimuli = random.choice(os.listdir(stimuli_dir))
+                stimuli_left = Stimuli(left_stimuli, background.get_width() * 0.15, background.get_height()/4)
+                stimuli_right = Stimuli(right_stimuli, background.get_width() * 0.85, background.get_height()/4)
+                correct_stimuli = random.choice((left_stimuli, right_stimuli))
+                if (correct_stimuli == left_stimuli):
+                    stimuli_correct = stimuli_left
+                    stimuli_wrong = stimuli_right
+                    stimuli_correct_str = 'Left'
+                else:
+                    stimuli_correct = stimuli_right
+                    stimuli_wrong = stimuli_left
+                    stimuli_correct_str = 'Right'
                 stimuli_bottom = Stimuli(correct_stimuli, background.get_width()/2, background.get_height()*.8)
-                allsprites = pygame.sprite.RenderPlain((stimuli_wrong, stimuli_correct, stimuli_bottom, pointer))
+                allsprites = pygame.sprite.RenderPlain((stimuli_left, stimuli_right, stimuli_bottom, pointer))
                 setup = True
 
             if chosen or timeout:
                 trials += 1
+                total_trials += 1
                 if correct:
                     correct_trials += 1
                     correct_sound.play()
                     pellet()
-                    value = "{}  Correct  {}".format(trials, time.time() - start_time)
+                    value = "{}  {}  {}  {}  {}  {}  {}  Correct".format(total_trials, trials, round(mts_parameters['PERCENT'],2), os.path.splitext(os.path.basename(left_stimuli))[0], stimuli_correct_str, os.path.splitext(os.path.basename(right_stimuli))[0], round(time.time() - start_time, 2))
                     time.sleep(3)
                 elif timeout or correct is False:
                     incorrect_sound.play()
-                    value = "{}  Timeout  {}".format(trials, time.time() - start_time)
+                    value = "{}  {}  {}  {}  {}  {}  {}  Incorrect".format(total_trials, trials, round(mts_parameters['PERCENT'],2), os.path.splitext(os.path.basename(left_stimuli))[0], stimuli_correct_str, os.path.splitext(os.path.basename(right_stimuli))[0], round(time.time() - start_time, 2))
                     screen.blit(background, (0, 0))
                     pygame.display.update()
                     time.sleep(mts_parameters['TIMEOUT'])
@@ -682,28 +709,37 @@ def main():
                         setup = True
                         start_time = time.time() # reset
             else:
-                correct_stimuli = random.choice(os.listdir(stimuli_dir))
-                wrong_stimuli = random.choice(os.listdir(stimuli_dir))
-                while (correct_stimuli == wrong_stimuli):
-                    wrong_stimuli = random.choice(os.listdir(stimuli_dir))
-                correct_position = random.choice([0.15, 0.85])
-                stimuli_correct = Stimuli(correct_stimuli, background.get_width() * correct_position, background.get_height()/4)
-                stimuli_wrong = Stimuli(wrong_stimuli, background.get_width() * (1 - correct_position), background.get_height()/4)
+                left_stimuli = random.choice(os.listdir(stimuli_dir))
+                right_stimuli = random.choice(os.listdir(stimuli_dir))
+                while (left_stimuli == right_stimuli):
+                    left_stimuli = random.choice(os.listdir(stimuli_dir))
+                stimuli_left = Stimuli(left_stimuli, background.get_width() * 0.15, background.get_height()/4)
+                stimuli_right = Stimuli(right_stimuli, background.get_width() * 0.85, background.get_height()/4)
+                correct_stimuli = random.choice((left_stimuli, right_stimuli))
+                if (correct_stimuli == left_stimuli):
+                    stimuli_correct = stimuli_left
+                    stimuli_wrong = stimuli_right
+                    stimuli_correct_str = 'Left'
+                else:
+                    stimuli_correct = stimuli_right
+                    stimuli_wrong = stimuli_left
+                    stimuli_correct_str = 'Right'
                 stimuli_bottom = Stimuli(correct_stimuli, background.get_width()/2, background.get_height()*.8)
                 allsprites = pygame.sprite.RenderPlain((stimuli_bottom, pointer))
                 waiting = True
 
             if chosen or timeout:
                 trials += 1
+                total_trials += 1
                 if correct:
                     correct_trials += 1
                     correct_sound.play()
                     pellet()
-                    value = "{}  Correct  {}".format(trials, time.time() - start_time)
+                    value = "{}  {}  {}  {}  {}  {}  {}  Correct".format(total_trials, trials, round(dmts_parameters['PERCENT'],2), os.path.splitext(os.path.basename(left_stimuli))[0], stimuli_correct_str, os.path.splitext(os.path.basename(right_stimuli))[0], round(time.time() - start_time, 2))
                     time.sleep(3)
                 elif timeout or correct is False:
                     incorrect_sound.play()
-                    value = "{}  Timeout  {}".format(trials, time.time() - start_time)
+                    value = "{}  {}  {}  {}  {}  {}  {}  Incorrect".format(total_trials, trials, round(dmts_parameters['PERCENT'],2), os.path.splitext(os.path.basename(left_stimuli))[0], stimuli_correct_str, os.path.splitext(os.path.basename(right_stimuli))[0], round(time.time() - start_time, 2))
                     screen.blit(background, (0, 0))
                     pygame.display.update()
                     time.sleep(dmts_parameters['TIMEOUT'])
@@ -724,9 +760,9 @@ def main():
 
 
 
-        elif current_game == 'Learning':
+        elif current_game == 'LS':
             if setup:
-                if (time.time() - start_time > learning_parameters['RESPONSE']):
+                if (time.time() - start_time > ls_parameters['RESPONSE']):
                     timeout = True
                 elif stimuli_correct.rect.contains(pointer):
                     correct = True
@@ -735,33 +771,54 @@ def main():
                     correct = False
                     chosen = True
             else:
+                left_stimuli = random.choice(os.listdir(stimuli_dir))
+                right_stimuli = random.choice(os.listdir(stimuli_dir))
+                while (right_stimuli == correct_stimuli):
+                    right_stimuli = random.choice(os.listdir(stimuli_dir))
+                while (left_stimuli == right_stimuli and left_stimuli == correct_stimuli):
+                    left_stimuli = random.choice(os.listdir(stimuli_dir))
+
                 if new_stimuli:
-                    correct_stimuli = random.choice(os.listdir(stimuli_dir))
-                wrong_stimuli = random.choice(os.listdir(stimuli_dir))
-                while (correct_stimuli == wrong_stimuli):
-                    wrong_stimuli = random.choice(os.listdir(stimuli_dir))
-                correct_position = random.choice((0.15, 0.85))
-                stimuli_correct = Stimuli(correct_stimuli, background.get_width() * correct_position, background.get_height()/2)
-                stimuli_wrong = Stimuli(wrong_stimuli, background.get_width() * (1 - correct_position), background.get_height()/2)
-                allsprites = pygame.sprite.RenderPlain((stimuli_wrong, stimuli_correct, pointer))
+                    correct_stimuli = random.choice((left_stimuli, right_stimuli))
+                else:
+                    if random.choice((1, 2)) == 1:
+                        left_stimuli = correct_stimuli
+                    else:
+                        right_stimuli = correct_stimuli
+
+                stimuli_left = Stimuli(left_stimuli, background.get_width() * 0.15, background.get_height()/2)
+                stimuli_right = Stimuli(right_stimuli, background.get_width() * 0.85, background.get_height()/2)
+
+                if (correct_stimuli == left_stimuli):
+                    stimuli_correct = stimuli_left
+                    stimuli_wrong = stimuli_right
+                    stimuli_correct_str = 'Left'
+                else:
+                    stimuli_correct = stimuli_right
+                    stimuli_wrong = stimuli_left
+                    stimuli_correct_str = 'Right'
+                stimuli_bottom = Stimuli(correct_stimuli, background.get_width()/2, background.get_height()*.8)
+                allsprites = pygame.sprite.RenderPlain((stimuli_left, stimuli_right, pointer))
                 setup = True
+
                 new_stimuli = False
 
             if chosen or timeout:
                 trials += 1
+                total_trials += 1
                 problem_trials += 1
                 if correct:
                     correct_trials += 1
                     correct_sound.play()
                     pellet()
-                    value = "{}  Correct  {}".format(trials, time.time() - start_time)
+                    value = "{}  {}  {}  {}  {}  {}  {}  {}  Correct".format(total_trials, problems, trials, round(ls_parameters['PERCENT'],2), os.path.splitext(os.path.basename(left_stimuli))[0], stimuli_correct_str, os.path.splitext(os.path.basename(right_stimuli))[0], round(time.time() - start_time, 2))
                     time.sleep(3)
                 elif timeout or correct is False:
                     incorrect_sound.play()
-                    value = "{}  Timeout  {}".format(trials, time.time() - start_time)
+                    value = "{}  {}  {}  {}  {}  {}  {}  {}  Incorrect".format(total_trials, problems, trials, round(ls_parameters['PERCENT'],2), os.path.splitext(os.path.basename(left_stimuli))[0], stimuli_correct_str, os.path.splitext(os.path.basename(right_stimuli))[0], round(time.time() - start_time, 2))
                     screen.blit(background, (0, 0))
                     pygame.display.update()
-                    time.sleep(learning_parameters['TIMEOUT'])
+                    time.sleep(ls_parameters['TIMEOUT'])
                 write_event(results_file, current_game, value)
                 pointer.reset(background.get_width()/2, background.get_height()/2)
                 allsprites = pygame.sprite.RenderPlain((pointer))
@@ -770,12 +827,12 @@ def main():
                 timeout = False
                 chosen = False
                 setup = False
-                if problem_trials >= learning_parameters['TRIALS_PER_PROB']:
+                if problem_trials >= ls_parameters['TRIALS_PER_PROB']:
                     problem_trials = 0
                     problems += 1
                     new_stimuli = True
-                    if (problems >= learning_parameters['NUM_PROBS']):
-                        if (correct_trials / trials) >= (learning_parameters['PERCENT'] / 100):
+                    if (problems > ls_parameters['NUM_PROBS']):
+                        if (correct_trials / trials) >= (ls_parameters['PERCENT'] / 100):
                             correct_trials = 0
                             trials = 0
                             gameover = True

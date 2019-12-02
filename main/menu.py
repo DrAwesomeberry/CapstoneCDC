@@ -159,7 +159,7 @@ def load_parameters(filename, values, window):
     window['TIT_DMTS_NO'].Update(re.search('No', read_parameter('DMTS Task Titration', parameters), re.IGNORECASE))
 
     window['L_YES'].Update(re.search('Yes', read_parameter('Learning Set Task Active', parameters), re.IGNORECASE))
-    window['L_NO'].Update(re.search('No', read_parameter('Learning Set Active', parameters), re.IGNORECASE))
+    window['L_NO'].Update(re.search('No', read_parameter('Learning Set Task Active', parameters), re.IGNORECASE))
     window['TRIALSPERPROB_LS'].Update(read_parameter('Learning Set Trials Per Problem', parameters))
     window['NUMPROBS_LS'].Update(read_parameter('Learning Set Number of Problems', parameters))
     window['PERCENT_LS'].Update(read_parameter('Learning Set % Correct for Criterion', parameters))
