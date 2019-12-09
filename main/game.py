@@ -69,13 +69,13 @@ BACKGROUND_COLOR = (250,250,250)
 
 """ Function that dispenses 1 pellet using the stepper motor """
 def pellet():
-	# need to declare as global otherwise won't interpret properly
+    # need to declare as global otherwise won't interpret properly
     global motor_dir
     global dir_num
 
     # 30 steps for one pellet dispensed
     for j in range(30):
-    	# pause inbetween the steps
+      # pause inbetween the steps
         time.sleep(0.01)
 
         # motor direction of 1 is FORWARD, 0 is BACKWARD
@@ -91,15 +91,15 @@ def pellet():
         motor_dir = motor_dir * -1
 
 """ Function to read a parameter from a given array of text and return its value
-	@param name of the parameter to search for
-	@param parameters array of text to search 
-	@return the value of the parameter found """
+    @param name of the parameter to search for
+    @param parameters array of text to search 
+    @return the value of the parameter found """
 def read_parameter(name, parameters):
-	# loop through every text line in parameters
+    # loop through every text line in parameters
     for i in range(0, len(parameters)):
-    	# search for the name and ignore upper/lower case
+        # search for the name and ignore upper/lower case
         if re.search(name, parameters[i], re.IGNORECASE):
-        	# return the value of the parameter which is on the next line after our found name
+            # return the value of the parameter which is on the next line after our found name
             return parameters[i + 1].rstrip('\n')
 
     # if not found, return an error popup and exit program
@@ -107,11 +107,11 @@ def read_parameter(name, parameters):
     sys.exit()
 
 """ Function to load all of the task parameter dictionaries from the file passed in
-	@param filename of the parameter file to use """
+    @param filename of the parameter file to use """
 def load_and_check_params(filename):
-	# make sure file exists in main/ directory
+    # make sure file exists in main/ directory
     if os.path.exists(filename) is False:
-    	# error popup and exit program
+        # error popup and exit program
         sg.Popup('Error:', filename + ' does not exist')
         sys.exit()
 
@@ -191,22 +191,22 @@ def load_and_check_params(filename):
     @param task currently running
     @param value string from task to write """
 def write_event(file, task, value):
-	# get current time
+    # get current time
     time = datetime.datetime.now()
     file.write(time.strftime('%m-%d-%Y %H:%M:%S  ') + task + '  ' + value + '\n')
 
 """ Function to return a randomly generated list
-	@param start value for list
-	@param end value for list
-	@param length of list to return
-	@return random list generated """
+    @param start value for list
+    @param end value for list
+    @param length of list to return
+    @return random list generated """
 def random_list(start, end, length):
-	# make empty list
+    # make empty list
     rlist = [] 
   
     # loop until rlist is of desired length
     while len(rlist) != length:
-    	# generate random int in desired range
+        # generate random int in desired range
         r = random.randint(start, end)
 
         # only add if random int is not already in rlist
@@ -220,21 +220,21 @@ def random_list(start, end, length):
     @param colorkey
     @return pygame image and rect loaded from file """
 def load_image(filename, colorkey=None):
-	# get full path main/data/stimuli/filename
+    # get full path main/data/stimuli/filename
     image_path = os.path.join(stimuli_dir, filename)
 
     try:
-    	# load file as pygame image
+        # load file as pygame image
         image = pygame.image.load(image_path)
 
         # scale image so that it will fit nicely in screen (650 width x 300 height)
         while (image.get_width() > 650 or image.get_height() > 300):
-        	# scale down image by 0.9, keep widthxlength ratio
+            # scale down image by 0.9, keep widthxlength ratio
             image = pygame.transform.rotozoom(image, 0, 0.9)
 
     # if it doesn't load properly
     except pygame.error:
-    	# error popup and exit program
+        # error popup and exit program
         sg.Popup('Error:', 'Cannot load image:' + image_path)
         sys.exit()
 
@@ -251,7 +251,7 @@ def load_image(filename, colorkey=None):
     @param filename of sound file
     @return pygame sound object """
 def load_sound(filename):
-	# make empty sound class for pygame sound with play function
+    # make empty sound class for pygame sound with play function
     class NoneSound:
         def play(self): pass
 
@@ -263,7 +263,7 @@ def load_sound(filename):
     sound_path = os.path.join(data_dir, filename)
 
     try:
-    	# try to load pygame sound from file
+        # try to load pygame sound from file
         sound = pygame.mixer.Sound(sound_path)
 
     # if sound does not properly open
@@ -276,11 +276,11 @@ def load_sound(filename):
 
 """ Class for Stimuli inside of our pygame setup for MTS, DMTS, LS """
 class Stimuli(pygame.sprite.Sprite):
-	""" Stimuli Constructor
-	    @param self
-	    @param stimuli filename to use for self.image
-	    @param x position to place stimuli
-	    @param y position to place stimuli """
+    """ Stimuli Constructor
+        @param self
+        @param stimuli filename to use for self.image
+        @param x position to place stimuli
+        @param y position to place stimuli """
     def __init__(self, stimuli, x, y):
         pygame.sprite.Sprite.__init__(self)  # call Sprite initializer
         self.image, self.rect = load_image(stimuli, -1) # load stimuli image pygame object
@@ -293,7 +293,7 @@ class Target(pygame.sprite.Sprite):
         @param background from pygame
         @param current_task that is running
         @param diameter for the circle """
-    def __init__(self, background, current_task, diameter):\
+    def __init__(self, background, current_task, diameter):
         pygame.sprite.Sprite.__init__(self) #call Sprite initializer
 
         self.diameter = int(diameter) # set desired diameter
@@ -326,7 +326,7 @@ class Target(pygame.sprite.Sprite):
         @param self
         @param color to set the circle to """
     def change_color(self, color):
-    	# save x, y coords
+        # save x, y coords
         x = self.rect.x
         y = self.rect.y
 
@@ -341,13 +341,13 @@ class Target(pygame.sprite.Sprite):
         @param self
         @param background from pygame """
     def update(self, background):
-    	joystick_moved = False
+        joystick_moved = False
 
         # if Chase task
-        if (self.current_task == 'Chase'):
-        	# move based on joystick as long as there is a joystick
-    		if self.joystick_count != 0:
-    			# check if joystick has moved in x axis atleast 0.1
+        if self.current_task == 'Chase':
+            # move based on joystick as long as there is a joystick
+            if self.joystick_count != 0:
+                # check if joystick has moved in x axis atleast 0.1
                 horiz_axis_pos = self.my_joystick.get_axis(0)
                 if abs(horiz_axis_pos) < 0.1:
                     horiz_axis_pos = 0
@@ -356,14 +356,14 @@ class Target(pygame.sprite.Sprite):
                 vert_axis_pos = self.my_joystick.get_axis(1)
                 if abs(vert_axis_pos) < 0.1:
                     vert_axis_pos = 0
-     			
-     			# if joystick has moved atleast 0.1, 
+    
+                # if joystick has moved atleast 0.1, 
                 if (horiz_axis_pos != 0 or vert_axis_pos != 0):
-                    josyick_moved = True
+                    joystick_moved = True
         
         # if Pursuit task, or if in Chase task and joystick has moved
-        if (self.current_task == 'Pursuit' or joystick_moved):
-        	# update x,y based on velocities
+        if (joystick_moved or self.current_task == 'Pursuit'):
+            # update x,y based on velocities
             self.rect.x = self.rect.x + self.velX;
             self.rect.y = self.rect.y + self.velY;
 
@@ -388,9 +388,9 @@ class Pointer(pygame.sprite.Sprite):
         @param self
         @param diameter for the Pointer """
     def __init__(self, diameter):
-    	pygame.sprite.Sprite.__init__(self) # call Sprite initializer
+        pygame.sprite.Sprite.__init__(self) # call Sprite initializer
 
-    	# make pygame object of a RED filled in circle of desired diameter
+        # make pygame object of a RED filled in circle of desired diameter
         self.diameter = int(diameter) # set diameter of circle
         self.image = pygame.Surface([self.diameter,self.diameter])
         self.image.fill(BACKGROUND_COLOR)
@@ -452,7 +452,7 @@ class Pointer(pygame.sprite.Sprite):
         for animal ID selection, reads parameters from parameter_file, 
         and then starts the pygame loop running every task in task_list """
 def main():
-	# check if animal_ids_file in in main/
+    # check if animal_ids_file in in main/
     animal_ids_path = os.path.join(main_dir, animal_ids_file)
     if os.path.exists(animal_ids_path) is False:
         sg.Popup('Error:', animal_ids_path + ' does not exist')
@@ -480,7 +480,7 @@ def main():
 
     # Loop until user makes an animal ID selection or exits
     while True:
-    	# update current pysimplegui values
+        # update current pysimplegui values
         event, values = window.read()
 
         # if user closes window
@@ -492,11 +492,11 @@ def main():
         if event in (['Run']):
             # if user did not make a subject ID selection
             if values['SUBJECT'] in ('', None):
-            	# Popup error and continue selection menu
+                # Popup error and continue selection menu
                 sg.Popup('Error:', 'Subject field cannot be blank')
             else:
-            	# Close window
-            	break
+                # Close window
+                break
 
     # set subject ID for results file logging from user selection in previous menu
     subject = values['SUBJECT']
@@ -578,7 +578,7 @@ def main():
 
         # if task is over
         if task_over:
-        	# remove whatever task was currently running
+            # remove whatever task was currently running
             task_list.remove(current_task)
 
             # if task_list is empty, end program
@@ -617,37 +617,37 @@ def main():
         screen.blit(background, (0, 0))
         allsprites.draw(screen)
 
-        """ Side task """
+        # Side task
         if current_task == 'Side':
-        	# if already setup
-        	if setup:
-        		# if no response in Reponse Time seconds, timeout
-	            if (time.time() - start_time > side_parameters['RESPONSE']):
-	                timeout = True
+            # if already setup
+            if setup:
+                # if no response in Reponse Time seconds, timeout
+                if (time.time() - start_time > side_parameters['RESPONSE']):
+                    timeout = True
 
-	            elif side_level == 1: # side level 1
-	                # draw random green walls from setup selection
-	                for i in side_wall_list:
-	                    screen.fill(GREEN, side_walls[i])
+                elif side_level == 1: # side level 1
+                    # draw random green walls from setup selection
+                    for i in side_wall_list:
+                        screen.fill(GREEN, side_walls[i])
 
-	                # every joystick event, check if Pointer was moved
-	                # if Pointer was moved, correct criterion
-	                for event in pygame.event.get():
-	                    if pointer.rect.x != background.get_width()/2 or pointer.rect.y != background.get_height()/2:
-	                        correct = True
+                    # every joystick event, check if Pointer was moved
+                    # if Pointer was moved, correct criterion
+                    for event in pygame.event.get():
+                        if pointer.rect.x != background.get_width()/2 or pointer.rect.y != background.get_height()/2:
+                            correct = True
 
-	            elif side_level in (2, 3, 4, 5, 6): # side level > 1
-	                # draw random green walls from setup selection
-	                for i in side_wall_list:
-	                    screen.fill(GREEN, side_walls[i])
+                elif side_level in (2, 3, 4, 5, 6): # side level > 1
+                    # draw random green walls from setup selection
+                    for i in side_wall_list:
+                        screen.fill(GREEN, side_walls[i])
 
-	                    # if Pointer collides with a wall, correct criterion
-	                    if side_walls[i].colliderect(pointer):
-	                        correct = True
+                        # if Pointer collides with a wall, correct criterion
+                        if side_walls[i].colliderect(pointer):
+                            correct = True
 
-	        # need to setup
-	        else:
-	        	# based on current side_level, generate a random list of indices for the side_wall array
+            # need to setup
+            else:
+                # based on current side_level, generate a random list of indices for the side_wall array
                 if side_level in (1, 2):
                     side_wall_list = (0, 1, 2, 3)
                 elif side_level == 3:
@@ -664,8 +664,8 @@ def main():
                 allsprites = pygame.sprite.RenderPlain((pointer))
 
                 # reset task variables
-	        	setup = True
-	        	start_time = time.time()
+                setup = True
+                start_time = time.time()
 
             # trial over
             if correct or timeout:
@@ -706,11 +706,11 @@ def main():
 
 
 
-        """ Chase task """
+        # Chase task
         elif current_task == 'Chase':
-        	# if already setup
+            # if already setup
             if setup:
-            	# if no response in Reponse Time seconds, timeout
+                # if no response in Reponse Time seconds, timeout
                 if (time.time() - start_time > chase_parameters['RESPONSE']):
                     timeout = True
                 # check if Pointer has reached Target circle
@@ -719,7 +719,7 @@ def main():
 
             # need to set up
             else:
-            	# decide circle size of target from parameters
+                # decide circle size of target from parameters
                 if re.search('Small', chase_parameters['CIRCLE_SIZE'], re.IGNORECASE):
                     target_size = 100
                 elif re.search('Medium', chase_parameters['CIRCLE_SIZE'], re.IGNORECASE):
@@ -764,17 +764,17 @@ def main():
 
 
 
-        """ Pursuit task """
+        # Pursuit task
         elif current_task == 'Pursuit':
-        	# if already set
+            # if already set
             if setup:
-            	# if no response in Reponse Time seconds, timeout
+                # if no response in Reponse Time seconds, timeout
                 if (time.time() - start_time > pursuit_parameters['RESPONSE']):
                     timeout = True
 
                 # if Pointer is inside of Target
                 elif target.rect.contains(pointer):
-                	# if it was already inside
+                    # if it was already inside
                     if inside:
                         target.change_color(GREEN) # change target color to green
                         # if its been Pursuit Time, correct criterion
@@ -793,7 +793,7 @@ def main():
 
             # need to setup
             else:
-            	# decide circle size of target from parameters
+                # decide circle size of target from parameters
                 if re.search('Small', pursuit_parameters['CIRCLE_SIZE'], re.IGNORECASE):
                     target_size = 100
                 elif re.search('Medium', pursuit_parameters['CIRCLE_SIZE'], re.IGNORECASE):
@@ -839,11 +839,11 @@ def main():
 
 
 
-        """ Match-to-Sample task """
+        # Match-to-Sample task
         elif current_task == 'MTS':
-        	# if already set up
+            # if already set up
             if setup:
-            	# if no response in Reponse Time seconds, timeout
+                # if no response in Reponse Time seconds, timeout
                 if (time.time() - start_time > mts_parameters['RESPONSE']):
                     timeout = True
 
@@ -859,7 +859,7 @@ def main():
 
             # need to set up
             else:
-            	# randomly select stimuli files from main/data/stimuli/
+                # randomly select stimuli files from main/data/stimuli/
                 correct_stimuli = random.choice(os.listdir(stimuli_dir))
                 wrong_stimuli = random.choice(os.listdir(stimuli_dir))
 
@@ -872,9 +872,13 @@ def main():
 
                 # assign stimuli_correct_str for logging
                 if correct_position == 0.15:
-                	stimuli_correct_str = 'Left'
+                    stimuli_correct_str = 'Left'
+                    left_stimuli = correct_stimuli
+                    right_stimuli = wrong_stimuli
                 else:
-                	stimuli_correct_str = 'Right'
+                    stimuli_correct_str = 'Right'
+                    right_stimuli = correct_stimuli
+                    left_stimuli = wrong_stimuli
 
                 # construct Stimuli objects for pygame
                 stimuli_correct = Stimuli(correct_stimuli, background.get_width() * correct_position, background.get_height()/4)
@@ -912,19 +916,19 @@ def main():
 
                 # if enough correct trials have been completed
                 if correct_trials >= mts_parameters['TRIALS']:
-                	# if accuracy of trials is > parameters percent, go to next task
+                    # if accuracy of trials is > parameters percent, go to next task
                     if (correct_trials / trials) >= (mts_parameters['PERCENT'] / 100):
                         task_over = True
 
 
 
-        ''' Delayed-Match-to-Sample Task '''
+        # Delayed-Match-to-Sample Task
         elif current_task == 'DMTS':
-        	# if already set up
+            # if already set up
             if setup:
-            	# if delay is over
+                # if delay is over
                 if delay_over:
-                	# if no response in Reponse Time seconds, timeout
+                    # if no response in Reponse Time seconds, timeout
                     if (time.time() - start_time > dmts_parameters['RESPONSE']):
                         timeout = True
 
@@ -940,9 +944,9 @@ def main():
 
                 # delay needs to happen
                 else:
-                	# start delay when Pointer collides bottom stimuli
+                    # start delay when Pointer collides bottom stimuli
                     if stimuli_bottom.rect.contains(pointer):
-                    	# blank screen
+                        # blank screen
                         screen.blit(background, (0, 0))
                         pygame.display.update()
                         time.sleep(dmts_parameters['DELAY']) # delay
@@ -968,9 +972,13 @@ def main():
 
                 # assign stimuli_correct_str for logging
                 if correct_position == 0.15:
-                	stimuli_correct_str = 'Left'
+                    stimuli_correct_str = 'Left'
+                    left_stimuli = correct_stimuli
+                    right_stimuli = wrong_stimuli
                 else:
-                	stimuli_correct_str = 'Right'
+                    stimuli_correct_str = 'Right'
+                    right_stimuli = correct_stimuli
+                    left_stimuli = wrong_stimuli
 
                 # construct Stimuli objects for pygame
                 stimuli_correct = Stimuli(correct_stimuli, background.get_width() * correct_position, background.get_height()/4)
@@ -999,7 +1007,7 @@ def main():
                     # set log value with relevant dmts information
                     value = "{}  {}  {}  {}  {}  {}  {}  Correct".format(total_trials, trials, round(dmts_parameters['PERCENT'],2), os.path.splitext(os.path.basename(left_stimuli))[0], stimuli_correct_str, os.path.splitext(os.path.basename(right_stimuli))[0], round(time.time() - start_time, 2))
                 else:
-                	# set log value with relevant dmts information
+                    # set log value with relevant dmts information
                     value = "{}  {}  {}  {}  {}  {}  {}  Incorrect".format(total_trials, trials, round(dmts_parameters['PERCENT'],2), os.path.splitext(os.path.basename(left_stimuli))[0], stimuli_correct_str, os.path.splitext(os.path.basename(right_stimuli))[0], round(time.time() - start_time, 2))
 
                 # set timeout time for incorrect response
@@ -1007,17 +1015,17 @@ def main():
 
                 # if enough correct trials have been completed
                 if correct_trials >= dmts_parameters['TRIALS']:
-                	# if accuracy of trials is > parameters percent, go to next task
+                    # if accuracy of trials is > parameters percent, go to next task
                     if (correct_trials / trials) >= (dmts_parameters['PERCENT'] / 100):
                         task_over = True
 
 
       
-        """ Learning Set task """
+        # Learning Set task
         elif current_task == 'LS':
-        	# if already set up
+            # if already set up
             if setup:
-            	# if no response in Reponse Time seconds, timeout
+                # if no response in Reponse Time seconds, timeout
                 if (time.time() - start_time > ls_parameters['RESPONSE']):
                     timeout = True
 
@@ -1033,8 +1041,12 @@ def main():
 
             # need to set up
             else:
-                # randomly select stimuli files from main/data/stimuli/
-                correct_stimuli = random.choice(os.listdir(stimuli_dir))
+                if new_stimuli:
+                    new_stimuli = False
+
+                    # randomly select stimuli files from main/data/stimuli/
+                    correct_stimuli = random.choice(os.listdir(stimuli_dir))
+
                 wrong_stimuli = random.choice(os.listdir(stimuli_dir))
 
                 # loop until the two stimuli are different
@@ -1046,22 +1058,25 @@ def main():
 
                 # assign stimuli_correct_str for logging
                 if correct_position == 0.15:
-                	stimuli_correct_str = 'Left'
+                    stimuli_correct_str = 'Left'
+                    left_stimuli = correct_stimuli
+                    right_stimuli = wrong_stimuli
                 else:
-                	stimuli_correct_str = 'Right'
+                    stimuli_correct_str = 'Right'
+                    right_stimuli = correct_stimuli
+                    left_stimuli = wrong_stimuli
 
                 # construct Stimuli objects for pygame
                 stimuli_correct = Stimuli(correct_stimuli, background.get_width() * correct_position, background.get_height()/2)
                 stimuli_wrong = Stimuli(wrong_stimuli, background.get_width() * (1 - correct_position), background.get_height()/2)
 
                 # add stimuli to sprite list
-                allsprites = pygame.sprite.RenderPlain((stimuli_left, stimuli_right, pointer))
+                allsprites = pygame.sprite.RenderPlain((stimuli_correct, stimuli_wrong, pointer))
 
                 # reset pointer to center of screen
                 pointer.reset(background.get_width()/2, background.get_height()/2)
                 
                 # reset task variables
-                new_stimuli = False
                 setup = True
                 start_time = time.time() # reset timer
 
@@ -1092,7 +1107,7 @@ def main():
 
                     # if enough problems have been completed
                     if (problems > ls_parameters['NUM_PROBS']):
-                    	# if accuracy of all ls trials is > parameters percent, go to next task
+                        # if accuracy of all ls trials is > parameters percent, go to next task
                         if (correct_trials / trials) >= (ls_parameters['PERCENT'] / 100):
                             task_over = True
 
@@ -1101,14 +1116,14 @@ def main():
         # any time a trial ends (correct criterion OR no response in Reponse Time OR a choice was made)
         if correct or timeout or chosen:
             if correct:
-            	correct_sound.play()
-            	pellet()
-            	time.sleep(3) # wait for sound to play and pellet to dispense
+                correct_sound.play()
+                pellet()
+                time.sleep(4) # wait for sound to play and pellet to dispense
             else:
-            	incorrect_sound.play()
+                incorrect_sound.play()
 
-            	# make screen blank for timeout_time
-            	screen.blit(background, (0, 0))
+                # make screen blank for timeout_time
+                screen.blit(background, (0, 0))
                 pygame.display.update()
                 time.sleep(timeout_time)
 

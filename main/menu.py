@@ -310,7 +310,7 @@ def main():
             # if there is a filename in load parameters file selection
             if (values['IN_FILE'] not in ('', None)):
                 # get array of text from parameter file
-                parameters = load_parameters(values['IN_FILE'], values, window)
+                parameters = load_parameters(values['IN_FILE'], window)
 
                 # if array of text is not empty, we have successfully loaded our parameters
                 if parameters is not None:
