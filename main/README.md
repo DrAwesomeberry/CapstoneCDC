@@ -99,6 +99,16 @@ Files created by 'game.py':
         {ID}Data.txt        -- results log file written to named from animal ID chosen in 'game.py'
 
 
+Editing Parameter Values:
+
+    'parameters.txt' should always hold the current desired parameters to be used in 'game.py', there are two ways to change the values there.
+
+        1. 'menu.py' provides an interactive way to load a default/previous parameter file and then modify their values by replacing the text there.
+        
+        2. Create and write to 'parameters.txt' manually (Warning: there is a certain syntax to all of the parameters that is expected in 'game.py')
+            For best results with this method, use 'defaults.txt' as a basis for 'parameters.txt' to ensure the syntax will not cause issues.
+
+
 Adding New Parameters to the System:
 
     {task} = task that the parameter will be used for, if it is a general parameter this will just be 'general' (i.e. 'Pursuit')
