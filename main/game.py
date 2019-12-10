@@ -112,7 +112,7 @@ def load_and_check_params(filename):
     # make sure file exists in main/ directory
     if os.path.exists(filename) is False:
         # error popup and exit program
-        sg.Popup('Error:', filename + ' does not exist')
+        sg.Popup('Error:', 'There must be a parameters file named ' + filename + ' in the current directory')
         sys.exit()
 
     # open the parameter file and get the array of text
@@ -1041,6 +1041,7 @@ def main():
 
             # need to set up
             else:
+                # if we're at the start of a problem, we need a new correct stimuli
                 if new_stimuli:
                     new_stimuli = False
 
@@ -1103,7 +1104,7 @@ def main():
                 if problem_trials >= ls_parameters['TRIALS_PER_PROB']:
                     problem_trials = 0
                     problems += 1 # increment number of problems
-                    new_stimuli = True
+                    new_stimuli = True # new problem
 
                     # if enough problems have been completed
                     if (problems > ls_parameters['NUM_PROBS']):
