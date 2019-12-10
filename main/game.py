@@ -18,8 +18,17 @@ import PySimpleGUI as sg
 from pygame.locals import *
 from pygame.compat import geterror
 
-# pip install adafruit-circuitpython-motorkit
-from adafruit_motorkit import MotorKit
+# try to initialize adafruit motorkit
+try:
+    # pip install adafruit-circuitpython-motorkit
+    from adafruit_motorkit import MotorKit
+
+# if PiHAT board is not connected
+except NotImplementedError:
+    # error popup and exit program
+    sg.Popup('Error:', 'PiHAT board not setup properly')
+    sys.exit()
+
 # pip install adafruit-circuitpython-motor
 from adafruit_motor import stepper
 
