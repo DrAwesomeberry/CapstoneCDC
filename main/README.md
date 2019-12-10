@@ -170,3 +170,6 @@ Adding New Parameters to the System:
 
                 This should search {name} in the target parameters file, and replace {value} with the value from our
                     pysimplegui object reference by {key}
+
+        4. In order for 'game.py' to be able to read this new parameter, you will need to edit 'parameters.txt' using either of the methods
+            described in the above section 'Editing Parameter Values'
